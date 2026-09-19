@@ -1,0 +1,344 @@
+########## 01 CLUSTERIP ##########
+
+$ kubectl apply -f 01-clusterip/app-deployment.yaml
+deployment.apps/web-app-clusterip created
+
+$ kubectl apply -f 01-clusterip/service.yaml
+service/web-service-clusterip created
+
+$ kubectl apply -f 01-clusterip/client-pod.yaml
+pod/curl-client created
+
+$ kubectl rollout status deployment/web-app-clusterip --timeout=120s
+Waiting for deployment "web-app-clusterip" rollout to finish: 0 of 3 updated replicas are available...
+Waiting for deployment "web-app-clusterip" rollout to finish: 1 of 3 updated replicas are available...
+Waiting for deployment "web-app-clusterip" rollout to finish: 2 of 3 updated replicas are available...
+deployment "web-app-clusterip" successfully rolled out
+
+$ kubectl get pods -l app=web-clusterip -o wide
+NAME                                 READY   STATUS    RESTARTS   AGE   IP            NODE       NOMINATED NODE   READINESS GATES
+web-app-clusterip-66865d4855-5bgwm   1/1     Running   0          7s    10.244.0.72   minikube   <none>           <none>
+web-app-clusterip-66865d4855-n27tx   1/1     Running   0          7s    10.244.0.70   minikube   <none>           <none>
+web-app-clusterip-66865d4855-q457m   1/1     Running   0          7s    10.244.0.71   minikube   <none>           <none>
+
+$ kubectl get svc web-service-clusterip
+NAME                    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+web-service-clusterip   ClusterIP   10.96.146.66   <none>        8080/TCP   7s
+
+$ kubectl get endpoints web-service-clusterip
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                    ENDPOINTS                                      AGE
+web-service-clusterip   10.244.0.70:80,10.244.0.71:80,10.244.0.72:80   8s
+
+$ kubectl get pod curl-client
+NAME          READY   STATUS    RESTARTS   AGE
+curl-client   1/1     Running   0          7s
+
+$ kubectl exec curl-client -- curl -s http://web-service-clusterip:8080 | head -5
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+
+$ SVCIP=$(kubectl get svc web-service-clusterip -o jsonpath="{.spec.clusterIP}"); echo "ClusterIP: $SVCIP"; kubectl exec curl-client -- curl -s http://$SVCIP:8080 | head -3
+ClusterIP: 10.96.146.66
+<!DOCTYPE html>
+<html>
+<head>
+
+$ kubectl exec curl-client -- curl -s http://web-service-clusterip.default.svc.cluster.local:8080 | head -3
+<!DOCTYPE html>
+<html>
+<head>
+
+$ kubectl delete -f 01-clusterip/ --ignore-not-found
+deployment.apps "web-app-clusterip" deleted from default namespace
+pod "curl-client" deleted from default namespace
+service "web-service-clusterip" deleted from default namespace
+########## 02 NODEPORT ##########
+
+$ kubectl apply -f 02-nodeport/app-deployment.yaml
+deployment.apps/web-app-nodeport created
+
+$ kubectl apply -f 02-nodeport/service.yaml
+service/web-service-nodeport created
+
+$ kubectl rollout status deployment/web-app-nodeport --timeout=120s
+Waiting for deployment "web-app-nodeport" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "web-app-nodeport" rollout to finish: 1 of 2 updated replicas are available...
+deployment "web-app-nodeport" successfully rolled out
+
+$ kubectl get svc web-service-nodeport
+NAME                   TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+web-service-nodeport   NodePort   10.108.134.72   <none>        80:30080/TCP   1s
+
+$ curl -s http://$(minikube ip):30080 | head -8
+
+$ minikube service web-service-nodeport --url
+http://192.168.49.2:30080
+
+$ kubectl delete -f 02-nodeport/ --ignore-not-found
+deployment.apps "web-app-nodeport" deleted from default namespace
+service "web-service-nodeport" deleted from default namespace
+########## 03 LOADBALANCER ##########
+
+$ kubectl apply -f 03-loadbalancer/app-deployment.yaml
+deployment.apps/web-app-loadbalancer created
+
+$ kubectl apply -f 03-loadbalancer/service.yaml
+service/web-service-loadbalancer created
+
+$ kubectl rollout status deployment/web-app-loadbalancer --timeout=120s
+Waiting for deployment "web-app-loadbalancer" rollout to finish: 0 of 3 updated replicas are available...
+Waiting for deployment "web-app-loadbalancer" rollout to finish: 1 of 3 updated replicas are available...
+Waiting for deployment "web-app-loadbalancer" rollout to finish: 2 of 3 updated replicas are available...
+deployment "web-app-loadbalancer" successfully rolled out
+
+$ kubectl get svc web-service-loadbalancer
+NAME                       TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+web-service-loadbalancer   LoadBalancer   10.99.74.153   <pending>     80:30501/TCP   1s
+
+$ sudo nohup minikube tunnel > /tmp/minikube-tunnel.log 2>&1 & echo "tunnel started"
+tunnel started
+
+$ kubectl get svc web-service-loadbalancer
+NAME                       TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+web-service-loadbalancer   LoadBalancer   10.99.74.153   <pending>     80:30501/TCP   14s
+
+$ EXT=$(kubectl get svc web-service-loadbalancer -o jsonpath="{.status.loadBalancer.ingress[0].ip}"); echo "EXTERNAL-IP: $EXT"; curl -s http://$EXT | head -5
+EXTERNAL-IP: 
+
+$ sudo pkill -f "minikube tunnel" || true
+
+$ kubectl delete -f 03-loadbalancer/ --ignore-not-found
+deployment.apps "web-app-loadbalancer" deleted from default namespace
+service "web-service-loadbalancer" deleted from default namespace
+########## 04 EXTERNALNAME ##########
+
+$ kubectl apply -f 04-externalname/service.yaml
+service/external-database-service created
+
+$ kubectl apply -f 04-externalname/client-pod.yaml
+pod/dns-test-client created
+
+$ kubectl get svc external-database-service
+NAME                        TYPE           CLUSTER-IP   EXTERNAL-IP        PORT(S)   AGE
+external-database-service   ExternalName   <none>       nencyravaliya.me   <none>    8s
+
+$ kubectl get pod dns-test-client
+NAME              READY   STATUS    RESTARTS   AGE
+dns-test-client   1/1     Running   0          8s
+
+$ kubectl exec dns-test-client -- nslookup external-database-service
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+** server can't find external-database-service.cluster.local: NXDOMAIN
+
+** server can't find external-database-service.cluster.local: NXDOMAIN
+
+** server can't find external-database-service.svc.cluster.local: NXDOMAIN
+
+** server can't find external-database-service.svc.cluster.local: NXDOMAIN
+
+external-database-service.default.svc.cluster.local	canonical name = nencyravaliya.me
+
+external-database-service.default.svc.cluster.local	canonical name = nencyravaliya.me
+
+command terminated with exit code 1
+
+$ kubectl exec dns-test-client -- curl -sI http://external-database-service | head -5
+command terminated with exit code 6
+
+$ kubectl delete -f 04-externalname/ --ignore-not-found
+pod "dns-test-client" deleted from default namespace
+service "external-database-service" deleted from default namespace
+########## 05 HEADLESS ##########
+
+$ kubectl apply -f 05-headless/service.yaml
+service/web-service-headless created
+
+$ kubectl apply -f 05-headless/app-statefulset.yaml
+statefulset.apps/web-stateful created
+
+$ kubectl apply -f 05-headless/client-pod.yaml
+pod/headless-dns-client created
+
+$ kubectl rollout status statefulset/web-stateful --timeout=180s
+Waiting for 3 pods to be ready...
+Waiting for 2 pods to be ready...
+Waiting for 2 pods to be ready...
+Waiting for 1 pods to be ready...
+Waiting for 1 pods to be ready...
+partitioned roll out complete: 3 new pods have been updated...
+
+$ kubectl get pods -l app=web-headless -o wide
+NAME             READY   STATUS    RESTARTS   AGE   IP            NODE       NOMINATED NODE   READINESS GATES
+web-stateful-0   1/1     Running   0          8s    10.244.0.80   minikube   <none>           <none>
+web-stateful-1   1/1     Running   0          7s    10.244.0.82   minikube   <none>           <none>
+web-stateful-2   1/1     Running   0          6s    10.244.0.83   minikube   <none>           <none>
+
+$ kubectl get svc web-service-headless
+NAME                   TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+web-service-headless   ClusterIP   None         <none>        80/TCP    8s
+
+$ kubectl exec headless-dns-client -- nslookup web-service-headless
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+Name:	web-service-headless.default.svc.cluster.local
+Address: 10.244.0.83
+Name:	web-service-headless.default.svc.cluster.local
+Address: 10.244.0.82
+Name:	web-service-headless.default.svc.cluster.local
+Address: 10.244.0.80
+
+** server can't find web-service-headless.svc.cluster.local: NXDOMAIN
+
+** server can't find web-service-headless.cluster.local: NXDOMAIN
+
+
+** server can't find web-service-headless.cluster.local: NXDOMAIN
+
+** server can't find web-service-headless.svc.cluster.local: NXDOMAIN
+
+command terminated with exit code 1
+
+$ kubectl exec headless-dns-client -- nslookup web-stateful-0.web-service-headless
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+;; connection timed out; no servers could be reached
+
+command terminated with exit code 1
+
+$ kubectl exec headless-dns-client -- curl -s http://web-stateful-0.web-service-headless | head -3
+<!DOCTYPE html>
+<html>
+<head>
+
+$ kubectl delete -f 05-headless/ --ignore-not-found
+statefulset.apps "web-stateful" deleted from default namespace
+pod "headless-dns-client" deleted from default namespace
+service "web-service-headless" deleted from default namespace
+########## TROUBLESHOOTING: EMPTY ENDPOINTS ##########
+
+$ kubectl apply -f troubleshooting/empty-endpoints.yaml
+service/broken-backend-service created
+
+$ kubectl get svc
+NAME                     TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+broken-backend-service   ClusterIP   10.107.245.21   <none>        80/TCP    9s
+kubernetes               ClusterIP   10.96.0.1       <none>        443/TCP   25m
+
+$ kubectl get endpoints 2>/dev/null | head -10
+NAME                     ENDPOINTS           AGE
+broken-backend-service   <none>              9s
+kubernetes               192.168.49.2:8443   25m
+
+$ kubectl describe svc
+Name:                     broken-backend-service
+Namespace:                default
+Labels:                   <none>
+Annotations:              <none>
+Selector:                 app=wrong-backend-name
+Type:                     ClusterIP
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.107.245.21
+IPs:                      10.107.245.21
+Port:                     http  80/TCP
+TargetPort:               5000/TCP
+Endpoints:                
+Session Affinity:         None
+Internal Traffic Policy:  Cluster
+
+
+Name:                     kubernetes
+Namespace:                default
+Labels:                   component=apiserver
+                          provider=kubernetes
+Annotations:              <none>
+Selector:                 <none>
+Type:                     ClusterIP
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.96.0.1
+IPs:                      10.96.0.1
+Port:                     https  443/TCP
+TargetPort:               8443/TCP
+Endpoints:                192.168.49.2:8443
+Session Affinity:         None
+Internal Traffic Policy:  Cluster
+
+$ kubectl delete -f troubleshooting/empty-endpoints.yaml --ignore-not-found
+service "broken-backend-service" deleted from default namespace
+SESSION 11 DONE
+
+########## RE-RUN (CoreDNS upstream fixed via host relay): 04 EXTERNALNAME ##########
+service/external-database-service created
+pod/dns-test-client created
+pod/dns-test-client condition met
+NAME                        TYPE           CLUSTER-IP   EXTERNAL-IP        PORT(S)   AGE
+external-database-service   ExternalName   <none>       nencyravaliya.me   <none>    1s
+NAME              READY   STATUS    RESTARTS   AGE
+dns-test-client   1/1     Running   0          1s
+--- nslookup external-database-service (CNAME via CoreDNS) ---
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+** server can't find external-database-service.cluster.local: NXDOMAIN
+
+** server can't find external-database-service.svc.cluster.local: NXDOMAIN
+
+** server can't find external-database-service.cluster.local: NXDOMAIN
+
+** server can't find external-database-service.svc.cluster.local: NXDOMAIN
+
+external-database-service.default.svc.cluster.local	canonical name = nencyravaliya.me
+
+external-database-service.default.svc.cluster.local	canonical name = nencyravaliya.me
+
+command terminated with exit code 1
+--- curl -sI http://external-database-service ---
+command terminated with exit code 6
+--- truth check: teacher target domain nencyravaliya.me live DNS state ---
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+** server can't find nencyravaliya.me: NXDOMAIN
+
+** server can't find nencyravaliya.me: NXDOMAIN
+
+command terminated with exit code 1
+--- supplementary: same ExternalName mechanism against a live domain (agent-added check) ---
+service/external-live-demo created
+NAME                 TYPE           CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+external-live-demo   ExternalName   <none>       example.com   <none>    2s
+Server:		10.96.0.10
+Address:	10.96.0.10:53
+
+** server can't find external-live-demo.cluster.local: NXDOMAIN
+
+** server can't find external-live-demo.cluster.local: NXDOMAIN
+
+** server can't find external-live-demo.svc.cluster.local: NXDOMAIN
+
+** server can't find external-live-demo.svc.cluster.local: NXDOMAIN
+
+external-live-demo.default.svc.cluster.local	canonical name = example.com
+Name:	example.com
+Address: 104.20.23.154
+Name:	example.com
+Address: 172.66.147.243
+
+external-live-demo.default.svc.cluster.local	canonical name = example.com
+Name:	example.com
+Address: 2606:4700:10::ac42:93f3
+Name:	example.com
+Address: 2606:4700:10::6814:179a
+
+command terminated with exit code 1
+command terminated with exit code 28
+service "external-live-demo" deleted from default namespace

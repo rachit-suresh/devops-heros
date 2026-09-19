@@ -1,0 +1,186 @@
+
+$ minikube version
+minikube version: v1.39.0
+commit: 7a9f6a841470a207de8cf4bafcccee0969d8ba10
+
+$ minikube status
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+
+$ kubectl get nodes -o wide
+NAME       STATUS   ROLES           AGE   VERSION   INTERNAL-IP    EXTERNAL-IP   OS-IMAGE                         KERNEL-VERSION             CONTAINER-RUNTIME
+minikube   Ready    control-plane   41m   v1.37.0   192.168.49.2   <none>        Debian GNU/Linux 12 (bookworm)   6.8.0-1064-azure (amd64)   containerd://2.3.4
+
+$ kubectl cluster-info
+Kubernetes control plane is running at https://192.168.49.2:8443
+CoreDNS is running at https://192.168.49.2:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+
+$ kubectl get pods -n kube-system
+NAME                               READY   STATUS    RESTARTS      AGE
+coredns-559f6c778d-smfgq           1/1     Running   1 (29m ago)   41m
+etcd-minikube                      1/1     Running   2 (29m ago)   41m
+kindnet-lw4f4                      1/1     Running   1 (29m ago)   36m
+kube-apiserver-minikube            1/1     Running   2 (29m ago)   41m
+kube-controller-manager-minikube   1/1     Running   2 (29m ago)   41m
+kube-proxy-cgjt6                   1/1     Running   2 (29m ago)   41m
+kube-scheduler-minikube            1/1     Running   2 (29m ago)   41m
+storage-provisioner                1/1     Running   2 (28m ago)   41m
+
+$ kubectl api-resources --namespaced=false | head -8
+NAME                                SHORTNAMES   APIVERSION                        NAMESPACED   KIND
+componentstatuses                   cs           v1                                false        ComponentStatus
+namespaces                          ns           v1                                false        Namespace
+nodes                               no           v1                                false        Node
+persistentvolumes                   pv           v1                                false        PersistentVolume
+mutatingadmissionpolicies                        admissionregistration.k8s.io/v1   false        MutatingAdmissionPolicy
+mutatingadmissionpolicybindings                  admissionregistration.k8s.io/v1   false        MutatingAdmissionPolicyBinding
+mutatingwebhookconfigurations                    admissionregistration.k8s.io/v1   false        MutatingWebhookConfiguration
+
+$ kubectl create namespace session9-demo
+namespace/session9-demo created
+
+$ kubectl apply -f session9-k8s/Rachit-24bcs10139/nginx-pod.yaml
+pod/rachit-nginx-pod created
+
+$ kubectl get pods -n session9-demo -o wide
+NAME               READY   STATUS    RESTARTS   AGE   IP            NODE       NOMINATED NODE   READINESS GATES
+rachit-nginx-pod   1/1     Running   0          1s    10.244.0.92   minikube   <none>           <none>
+
+$ kubectl describe pod rachit-nginx-pod -n session9-demo
+Name:             rachit-nginx-pod
+Namespace:        session9-demo
+Priority:         0
+Service Account:  default
+Node:             minikube/192.168.49.2
+Start Time:       Sat, 19 Sep 2026 21:13:39 +0000
+Labels:           app=rachit-nginx
+                  track=devops-lab
+Annotations:      <none>
+Status:           Running
+IP:               10.244.0.92
+IPs:
+  IP:  10.244.0.92
+Containers:
+  nginx:
+    Container ID:   containerd://623389d470dae163832219e897db2381d2868bfd31157945aed6767e0d2b1db1
+    Image:          nginx:1.27-alpine
+    Image ID:       sha256:6769dc3a703c719c1d2756bda113659be28ae16cf0da58dd5fd823d6b9a050ea
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Sat, 19 Sep 2026 21:13:40 +0000
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-4rw6t (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-4rw6t:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  1s    default-scheduler  Successfully assigned session9-demo/rachit-nginx-pod to minikube
+  Normal  Pulled     1s    kubelet            spec.containers{nginx}: Container image "nginx:1.27-alpine" already present on machine and can be accessed by the pod
+  Normal  Created    0s    kubelet            spec.containers{nginx}: Container created
+  Normal  Started    0s    kubelet            spec.containers{nginx}: Container started
+
+$ kubectl logs rachit-nginx-pod -n session9-demo
+/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf
+10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+/docker-entrypoint.sh: Sourcing /docker-entrypoint.d/15-local-resolvers.envsh
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh
+/docker-entrypoint.sh: Configuration complete; ready for start up
+2026/09/19 21:13:40 [notice] 1#1: using the "epoll" event method
+2026/09/19 21:13:40 [notice] 1#1: nginx/1.27.5
+2026/09/19 21:13:40 [notice] 1#1: built by gcc 14.2.0 (Alpine 14.2.0) 
+2026/09/19 21:13:40 [notice] 1#1: OS: Linux 6.8.0-1064-azure
+2026/09/19 21:13:40 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2026/09/19 21:13:40 [notice] 1#1: start worker processes
+2026/09/19 21:13:40 [notice] 1#1: start worker process 30
+2026/09/19 21:13:40 [notice] 1#1: start worker process 31
+
+$ kubectl exec -n session9-demo rachit-nginx-pod -- nginx -v
+nginx version: nginx/1.27.5
+
+$ kubectl get pods -n session9-demo --show-labels
+NAME               READY   STATUS    RESTARTS   AGE   LABELS
+rachit-nginx-pod   1/1     Running   0          1s    app=rachit-nginx,track=devops-lab
+
+$ kubectl get namespaces
+NAME              STATUS   AGE
+default           Active   41m
+ingress-nginx     Active   12m
+kube-node-lease   Active   41m
+kube-public       Active   41m
+kube-system       Active   41m
+session9-demo     Active   1s
+
+$ kubectl delete -f session9-k8s/Rachit-24bcs10139/nginx-pod.yaml
+pod "rachit-nginx-pod" deleted from session9-demo namespace
+
+$ kubectl delete namespace session9-demo
+namespace "session9-demo" deleted
+
+$ minikube stop
+* Stopping node "minikube"  ...
+* Powering off "minikube" via SSH ...
+* 1 node stopped.
+
+$ minikube status
+minikube
+type: Control Plane
+host: Stopped
+kubelet: Stopped
+apiserver: Stopped
+kubeconfig: Stopped
+
+
+$ minikube start --driver=docker
+* minikube v1.39.0 on Ubuntu 24.04 (docker/amd64)
+* Using the docker driver based on existing profile
+* Starting "minikube" primary control-plane node in "minikube" cluster
+* Pulling base image v0.0.51 ...
+! Failing to connect to https://registry.k8s.io/ from inside the minikube container
+* To pull new external images, you may need to configure a proxy: https://minikube.sigs.k8s.io/docs/reference/networking/proxy/
+* Preparing Kubernetes v1.37.0 on containerd 2.3.4 ...
+* Verifying Kubernetes components...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v5
+* Enabled addons: default-storageclass, storage-provisioner
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+
+$ minikube status
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
+
+SESSION 9 DONE

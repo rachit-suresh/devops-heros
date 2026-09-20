@@ -24,7 +24,7 @@ minikube start --driver=docker
 minikube status
 ```
 
-![Minikube start, status and stop](Screenshots/minikube-lifecycle.png)
+![Minikube start, status and stop](Screenshots/s9-1-env.png)
 
 `status` reports the four health markers of the cluster: the container `host`, the `kubelet`
 (the node agent), the `apiserver`, and whether `kubeconfig` points kubectl at this cluster.
@@ -55,7 +55,7 @@ kubectl get pods -n kube-system
 kubectl api-resources --namespaced=false | head -8
 ```
 
-![Cluster architecture](Screenshots/cluster-architecture.png)
+![Cluster architecture](Screenshots/s9-2-pod-running.png)
 
 Notice the control-plane components (`etcd`, `kube-apiserver`, `kube-controller-manager`,
 `kube-scheduler`) are themselves pods in `kube-system` — Kubernetes hosts its own brain as
@@ -97,7 +97,7 @@ kubectl describe pod rachit-nginx-pod -n session9-demo
 kubectl logs rachit-nginx-pod -n session9-demo
 ```
 
-![Pod create, describe and logs](Screenshots/pod-basics.png)
+![Pod create, describe and logs](Screenshots/s9-3-verify.png)
 
 `describe` shows the pod's full detail: which node it landed on, its pod IP, the resolved
 image, and the event trail (Scheduled -> Pulled -> Created -> Started). `logs` streams the
@@ -115,7 +115,7 @@ kubectl delete -f nginx-pod.yaml
 kubectl delete namespace session9-demo
 ```
 
-![exec, labels and cleanup](Screenshots/exec-labels-cleanup.png)
+![exec, labels and cleanup](Screenshots/s9-4-stop-start.png)
 
 - `kubectl exec` runs a command *inside* a running container — the Kubernetes equivalent of
   `docker exec`, used for quick debugging.

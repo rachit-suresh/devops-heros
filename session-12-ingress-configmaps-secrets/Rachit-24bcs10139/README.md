@@ -37,7 +37,11 @@ POSTGRES_DB     : yatri_production_db
 
 So one request path demonstrates the whole session: Ingress routing + ConfigMap config + Secret injection.
 
-Screenshot: `Screenshots/s12-3-ingress.png` (routing + both curls), `Screenshots/s12-1-configmap-secret.png`, `Screenshots/s12-2-backend-frontend.png`
+![ConfigMap and Secret](Screenshots/s12-1-configmap-secret.png)
+
+![Backend and frontend](Screenshots/s12-2-backend-frontend.png)
+
+![Ingress routing and curls](Screenshots/s12-3-ingress.png)
 
 ## Part 8 - The base64 newline bug
 
@@ -47,7 +51,7 @@ Reproduced the classic gotcha from the teacher's troubleshooting note: `echo "se
 
 Updated the ConfigMap, then showed that running pods still see the old env values - env vars are injected at container start. `kubectl rollout restart deployment` forces new pods, which pick up the new values. That is why "I changed the ConfigMap but nothing happened" is a rite of passage.
 
-Screenshot: `Screenshots/s12-4-secret-gotchas.png` (parts 8-9)
+![Secret and ConfigMap gotchas](Screenshots/s12-4-secret-gotchas.png)
 
 ## Takeaway
 

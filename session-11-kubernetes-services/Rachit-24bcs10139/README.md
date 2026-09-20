@@ -16,19 +16,19 @@ Full raw log: `evidence/session-11.log`. Screenshots are terminal captures rende
 
 The default service type: a stable virtual IP reachable only inside the cluster. I deployed the app, created the ClusterIP service, and from a client pod curled the service name - DNS resolved `web-service-clusterip` to its ClusterIP and the request was load-balanced across the backend pods. This is the workhorse for internal east-west traffic: pods come and go, the ClusterIP and DNS name stay.
 
-Screenshot: `Screenshots/s11-1-clusterip.png`
+![ClusterIP](Screenshots/s11-1-clusterip.png)
 
 ## 02 - NodePort
 
 Opens the same static port on every node (here 30xxx) and forwards to the pods. I curled `http://$(minikube ip):<nodeport>` from the VM host and got the app response. NodePort is how you reach a service from outside without a cloud load balancer - and under the hood a NodePort service also gets a ClusterIP.
 
-Screenshot: `Screenshots/s11-2-nodeport-lb.png` (top half)
+![NodePort and LoadBalancer](Screenshots/s11-2-nodeport-lb.png)
 
 ## 03 - LoadBalancer
 
 On a cloud provider this type provisions a real external load balancer and fills in EXTERNAL-IP. On minikube the service is created fine but EXTERNAL-IP stays `<pending>` because there is no cloud controller to fulfill it. I started `minikube tunnel` (the minikube shim that pretends to be a load balancer); in this docker-driver-on-a-VM setup the IP still stayed pending, which I left in the log as-is. The concept is still demonstrated by the manifest and behavior: LoadBalancer = NodePort + cloud provider integration, and without a provider it degrades to pending.
 
-Screenshot: `Screenshots/s11-2-nodeport-lb.png` (bottom half)
+
 
 ## 04 - ExternalName
 
@@ -47,19 +47,19 @@ Two honest caveats, both visible in the log:
 
 To prove the mechanism end-to-end I added one supplementary check of my own (clearly marked in the log): an identical ExternalName pointing at `example.com`, which resolved through CoreDNS to real A and AAAA addresses. Same mechanism, live target.
 
-Screenshot: `Screenshots/s11-3-externalname.png`
+![ExternalName](Screenshots/s11-3-externalname.png)
 
 ## 05 - Headless Service
 
 `clusterIP: None` means no virtual IP and no kube-proxy load balancing: DNS returns the pod IPs directly. With the StatefulSet, `nslookup web-service-headless` returned all pod IPs, and `web-stateful-0.web-service-headless` resolved to one specific pod - that per-pod DNS record is why headless services pair with StatefulSets (databases, queues) where clients must address individual members. I also curled a specific pod through its stable DNS name.
 
-Screenshot: `Screenshots/s11-4-headless.png`
+![Headless Service](Screenshots/s11-4-headless.png)
 
 ## Troubleshooting - the empty endpoints bug
 
 The teacher's broken manifest creates `broken-backend-service` with selector `app=wrong-backend-name`. `kubectl get endpoints` showed `<none>` - the service exists but routes to nothing. `kubectl describe svc` exposes the cause: the selector matches no pod labels. A service is only a selector over live pods; when endpoints are empty, the selector/label mismatch is almost always the bug. Fixing the selector (or the pod labels) repopulates endpoints.
 
-Screenshot: `Screenshots/s11-5-empty-endpoints.png`
+![Empty endpoints troubleshooting](Screenshots/s11-5-empty-endpoints.png)
 
 ## Takeaway
 

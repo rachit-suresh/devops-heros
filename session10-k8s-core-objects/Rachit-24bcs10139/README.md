@@ -23,7 +23,7 @@ Applied the teacher's manifests from `k8s-core-objects/` one by one, then inspec
 - **DaemonSet** runs exactly one pod per node. On my single-node cluster I got one pod; on a multi-node cluster every node would get its own copy (used for log agents, monitoring, etc.).
 - **StatefulSet** is for stateful workloads. Unlike a Deployment, pods get stable, ordered names (`mysql-0`, `mysql-1`, ...) and stable network identity. `kubectl describe sts mysql` showed `podManagementPolicy: OrderedReady` and the PVC template - each pod keeps its own storage across restarts.
 
-Screenshot: `Screenshots/s10-1-core-objects.png`
+![Core objects](Screenshots/s10-1-core-objects.png)
 
 ## Part 2 - Deployment Strategies
 
@@ -33,25 +33,27 @@ I deployed v1 of the app behind a NodePort service, started a background loop cu
 
 `kubectl rollout history` showed both revisions, and `kubectl rollout undo` took the Deployment back to v1 cleanly. Rolling update works because the Deployment scales the new ReplicaSet up and the old one down gradually (maxSurge/maxUnavailable), so the Service always has ready endpoints.
 
-Screenshots: `Screenshots/s10-2-rolling.png`, `Screenshots/s10-3-history-undo.png`
+![Rolling update](Screenshots/s10-2-rolling.png)
+
+![Rollout history and undo](Screenshots/s10-3-history-undo.png)
 
 ### Blue-green
 
 Two full environments exist at once: `myapp-blue` (v1) and `myapp-green` (v2), both running. The Service selects `version: blue` initially, so all traffic hits blue. The switch is a one-line change to the Service selector (`version: green`) - I watched `kubectl get endpoints` change from the blue pod IPs to the green ones, and the next curl returned the green response. Rollback is just flipping the selector back, which I also did. The cost is running double capacity during the cutover.
 
-Screenshot: `Screenshots/s10-4-blue-green.png`
+![Blue-green deployment](Screenshots/s10-4-blue-green.png)
 
 ### Canary
 
 Instead of switching everyone at once, canary sends a small slice of traffic to the new version. With 9 stable pods and 1 canary pod behind the same Service (roughly 10%), a 40-request curl loop hit the canary version only a few times. Scaling the canary to 3 out of 10 moved it to about 30% (6 of 20 requests in my sample), and promoting to 100% is just replacing the stable deployment. Kubernetes Services do not do weighted traffic splitting natively - the ratio comes from pod counts, which is why this is the simple-but-coarse version of canary.
 
-Screenshot: `Screenshots/s10-5-canary.png`
+![Canary deployment](Screenshots/s10-5-canary.png)
 
 ### Recreate
 
 Recreate kills every old pod first, then starts the new ones. The curl loop during the recreate showed `[no response]` for several seconds - a real, visible outage window. It is the simplest strategy and fine for dev or when the app cannot run two versions at once, but the downtime is why production systems avoid it.
 
-Screenshot: `Screenshots/s10-6-recreate.png`
+![Recreate deployment](Screenshots/s10-6-recreate.png)
 
 ## Part 3 - Pod Lifecycle
 
@@ -67,7 +69,7 @@ Ran the teacher's `pod-lifecycle/` manifests to observe every phase and hook:
 - **Multi-container pod** - two containers in one pod share localhost; the sidecar pattern in miniature.
 - **Graceful termination** - on delete, the pod goes `Terminating`, gets SIGTERM, then SIGKILL after `terminationGracePeriodSeconds` if it ignores it.
 
-Screenshot: `Screenshots/s10-7-lifecycle.png`
+![Pod lifecycle](Screenshots/s10-7-lifecycle.png)
 
 ## What I took away
 

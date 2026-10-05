@@ -1,0 +1,61 @@
+name: Session 16 CI/CD - 24BCS10139
+on:
+  push:
+    branches: [24bcs10139/session16-cicd]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    name: Test Application
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: session16-cicd
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pytest -v
+  security:
+    name: Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check lab for sensitive files
+        run: |
+          files=$(find session16-cicd -type f \( -name '.env' -o -name '*.pem' -o -name '*.key' \))
+          if [ -n "$files" ]; then echo "$files"; exit 1; fi
+          echo 'No sensitive-file patterns found (classroom check only).'
+  build:
+    name: Build Application
+    outputs:
+      package: ${{ steps.package.outputs.bundle }}
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build calculator package
+        working-directory: session16-cicd
+        run: bash build.sh
+      - name: Pass built package to deployment
+        id: package
+        run: echo "bundle=$(tar -czf - -C session16-cicd/build . | base64 -w0)" >> "$GITHUB_OUTPUT"
+  deploy:
+    name: Deploy and Smoke Test (ephemeral demo)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Receive actual built package
+        env:
+          PACKAGE: ${{ needs.build.outputs.package }}
+        run: |
+          mkdir deployed-app
+          printf %s "$PACKAGE" | base64 --decode | tar -xzf - -C deployed-app
+      - name: Deploy built artifact in isolated container
+        run: |
+          docker run --rm -v "$PWD/deployed-app:/app:ro" -w /app python:3.12-slim python -c 'from calculator import add, subtract, multiply, divide; assert add(10,5)==15; assert subtract(10,5)==5; assert multiply(10,5)==50; assert divide(10,5)==2; print("Deployed artifact smoke tests passed")'
+      - name: Record deployment boundary
+        run: echo 'Demo deployment uses the built artifact in an ephemeral runner container. No production service or external infrastructure was deployed.' >> "$GITHUB_STEP_SUMMARY"

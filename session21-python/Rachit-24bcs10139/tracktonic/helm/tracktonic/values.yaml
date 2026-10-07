@@ -1,0 +1,12 @@
+namespace: tracktonic
+backend:
+  image: tracktonic-backend
+  tag: latest
+  replicas: 2
+frontend:
+  image: tracktonic-frontend
+  tag: latest
+  replicas: 2
+databaseUrl: postgresql://tracktonic:tracktonic@db:5432/tracktonic
+ingress:
+  host: tracktonic.local

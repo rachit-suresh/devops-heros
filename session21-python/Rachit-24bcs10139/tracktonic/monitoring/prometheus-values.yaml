@@ -1,0 +1,20 @@
+# values for the prometheus community chart (helm install prometheus prometheus-community/prometheus -f prometheus-values.yaml)
+server:
+  extraScrapeConfigs: |
+    - job_name: tracktonic-backend
+      kubernetes_sd_configs:
+        - role: pod
+          namespaces:
+            names: [tracktonic]
+      relabel_configs:
+        - source_labels: [__meta_kubernetes_pod_label_app]
+          regex: backend
+          action: keep
+        - source_labels: [__meta_kubernetes_pod_ip]
+          target_label: __address__
+          replacement: $1:8000
+      metrics_path: /metrics
+alertmanager:
+  enabled: false
+pushgateway:
+  enabled: false

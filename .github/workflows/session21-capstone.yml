@@ -1,0 +1,76 @@
+name: Session 21 Capstone CI/CD - TrackTonic (24BCS10139)
+on:
+  push:
+    branches: [session-21-capstone-rachit-24bcs10139, main]
+    paths:
+      - 'session21-python/Rachit-24bcs10139/tracktonic/**'
+      - '.github/workflows/session21-capstone.yml'
+  workflow_dispatch:
+
+env:
+  APP_DIR: session21-python/Rachit-24bcs10139/tracktonic
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.APP_DIR }}/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - run: pytest
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.APP_DIR }}/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm run build
+
+  docker-build-push:
+    needs: [pytest, frontend-build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build backend image
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/tracktonic-backend:${{ github.sha }} -t ghcr.io/${{ github.repository_owner }}/tracktonic-backend:latest ${{ env.APP_DIR }}/backend
+      - name: Build frontend image
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:${{ github.sha }} -t ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:latest ${{ env.APP_DIR }}/frontend
+      - name: Trivy scan backend (fail on HIGH,CRITICAL)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/tracktonic-backend:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+      - name: Trivy scan frontend (fail on HIGH,CRITICAL)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+          ignore-unfixed: true
+      - name: Push images
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/tracktonic-backend:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/tracktonic-backend:latest
+          docker push ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:latest

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrackTonic - music listening tracker</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: system-ui, sans-serif; background: #12121c; color: #e8e8f0; margin: 0; }
+  header { background: #1e1e30; padding: 16px 24px; }
+  h1 { margin: 0; font-size: 22px; }
+  h1 span { color: #8ecafc; }
+  main { max-width: 760px; margin: 24px auto; padding: 0 16px; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  input { background: #1e1e30; border: 1px solid #333; color: inherit; padding: 8px 10px; border-radius: 6px; }
+  button { background: #2f6fed; color: #fff; border: 0; padding: 8px 14px; border-radius: 6px; cursor: pointer; }
+  button.ghost { background: #333; }
+  .album { background: #1e1e30; border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .meta { color: #9a9ab0; font-size: 13px; }
+  .stars button { background: none; padding: 2px; font-size: 18px; }
+  .badge { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #2a2a44; }
+</style>
+</head>
+<body>
+<header><h1>Track<span>Tonic</span> - log albums, rate them, keep your queue</h1></header>
+<main>
+  <form id="add">
+    <input id="title" placeholder="Album title" required>
+    <input id="artist" placeholder="Artist" required>
+    <input id="year" placeholder="Year" type="number" style="width:90px">
+    <button type="submit">Queue album</button>
+  </form>
+  <div id="list">loading...</div>
+</main>
+<script>
+async function api(path, opts) { const r = await fetch("/api" + path, opts); return r.status === 204 ? null : r.json(); }
+async function load() {
+  const albums = await api("/albums");
+  document.getElementById("list").innerHTML = albums.map(a => `
+    <div class="album">
+      <div><strong>${a.title}</strong> - ${a.artist} <span class="meta">${a.year || ""}</span></div>
+      <div class="stars">
+        <span class="badge">${a.status}</span>
+        ${[1,2,3,4,5].map(n => `<button title="rate ${n}" onclick="rate(${a.id},${n})">${n <= (a.rating||0) ? "★" : "☆"}</button>`).join("")}
+        <button class="ghost" onclick="del(${a.id})">delete</button>
+      </div>
+    </div>`).join("") || "No albums yet - queue your first one above.";
+}
+async function rate(id, rating) { await api("/albums/" + id, {method:"PUT", headers:{"Content-Type":"application/json"}, body: JSON.stringify({rating})}); load(); }
+async function del(id) { await api("/albums/" + id, {method:"DELETE"}); load(); }
+document.getElementById("add").addEventListener("submit", async e => {
+  e.preventDefault();
+  const y = document.getElementById("year").value;
+  await api("/albums", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({title: title.value, artist: artist.value, year: y ? +y : null})});
+  e.target.reset(); load();
+});
+load();
+</script>
+</body>
+</html>

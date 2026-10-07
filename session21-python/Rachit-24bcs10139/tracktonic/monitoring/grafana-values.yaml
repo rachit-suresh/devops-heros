@@ -1,0 +1,31 @@
+# values for the grafana community chart (helm install grafana grafana/grafana -f grafana-values.yaml)
+adminPassword: tracktonic
+service:
+  type: NodePort
+  nodePort: 30030
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-server
+        isDefault: true
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: default
+        folder: TrackTonic
+        type: file
+        options:
+          path: /var/lib/grafana/dashboards
+dashboards:
+  default:
+    tracktonic:
+      json: |
+        {"title":"TrackTonic","schemaVersion":39,"version":1,"refresh":"5s",
+         "panels":[{"id":1,"type":"timeseries","title":"HTTP requests/sec","gridPos":{"h":9,"w":12,"x":0,"y":0},
+           "targets":[{"expr":"sum by (endpoint) (rate(tracktonic_http_requests_total[1m]))","legendFormat":"{{endpoint}}"}]},
+          {"id":2,"type":"timeseries","title":"Request latency p95","gridPos":{"h":9,"w":12,"x":12,"y":0},
+           "targets":[{"expr":"histogram_quantile(0.95, sum by (le, endpoint) (rate(tracktonic_http_request_duration_seconds_bucket[5m])))","legendFormat":"{{endpoint}}"}]}]}

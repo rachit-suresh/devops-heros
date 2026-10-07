@@ -40,6 +40,11 @@ jobs:
       - name: Build calculator package
         working-directory: session16-cicd
         run: bash build.sh
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: calculator-build
+          path: session16-cicd/build/
       - name: Pass built package to deployment
         id: package
         run: echo "bundle=$(tar -czf - -C session16-cicd/build . | base64 -w0)" >> "$GITHUB_OUTPUT"

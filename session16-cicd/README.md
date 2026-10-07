@@ -24,3 +24,18 @@ Re-verified against the official Session 16 spec (final-cicd-pipeline README in 
 - **Build artifact:** the Build job now also uploads the packaged build with `actions/upload-artifact` (artifact name `calculator-build`), so the pipeline demonstrates a stored artifact in addition to job-to-job handoff. Confirmed present on the green run (902 bytes).
 - **Failure gate demonstrated:** a deliberately broken push failed at the Test stage, and the Build + Deploy jobs were correctly skipped: https://github.com/rachit-suresh/devops-heros/actions/runs/37577639562
 - **Green run after fix:** the follow-up push restored all four stages to green: https://github.com/rachit-suresh/devops-heros/actions/runs/37577740951
+
+
+## Screenshots
+
+### Green pipeline after the fix
+
+Actual GitHub Actions run [37577740951](https://github.com/rachit-suresh/devops-heros/actions/runs/37577740951), captured October 7, 2026. All four jobs passed; the stored build artifact is visible.
+
+![Successful CI/CD pipeline and stored build artifact](Screenshots/01-green-pipeline.png)
+
+### Failure gate
+
+Actual GitHub Actions run [37577639562](https://github.com/rachit-suresh/devops-heros/actions/runs/37577639562), captured October 7, 2026. The deliberately broken test failed, so Build and Deploy were skipped.
+
+![Failed test with Build and Deploy skipped](Screenshots/02-failure-gate.png)

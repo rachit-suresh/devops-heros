@@ -15,10 +15,22 @@ Ran the official `terraform-s3-demo` against LocalStack (local AWS emulation) in
 - Verified inside LocalStack: `awslocal s3 ls` shows the bucket; uploaded `hello.txt` and listed it in the bucket.
 
 ## Screenshots
-- `Screenshots/01-init-validate.png` - init (aws provider v6.67.0) + validate
-- `Screenshots/02-plan.png` - plan
-- `Screenshots/03-apply.png` - apply complete
-- `Screenshots/04-verify.png` - outputs + bucket/object verification
+### init (aws provider v6.67.0) + validate
+
+![init (aws provider v6.67.0) + validate](Screenshots/01-init-validate.png)
+
+### plan
+
+![plan](Screenshots/02-plan.png)
+
+### apply complete
+
+![apply complete](Screenshots/03-apply.png)
+
+### outputs + bucket/object verification
+
+![outputs + bucket/object verification](Screenshots/04-verify.png)
+
 
 ## Evidence
 - `evidence/session-18.log` - full terminal capture

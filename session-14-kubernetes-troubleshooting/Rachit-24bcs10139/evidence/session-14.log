@@ -1,0 +1,120 @@
+### SESSION 14 RUN - Wed Oct  7 06:07:32 UTC 2026 - codespace codespaces-d454e6
+=== 1. deploy app ===
+deployment.apps/troubleshooting-app created
+service/troubleshooting-service created
+Waiting for deployment "troubleshooting-app" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "troubleshooting-app" rollout to finish: 1 of 2 updated replicas are available...
+deployment "troubleshooting-app" successfully rolled out
+NAME                                   READY   STATUS    RESTARTS   AGE
+troubleshooting-app-59d4957864-g8d57   1/1     Running   0          0s
+troubleshooting-app-59d4957864-r687d   1/1     Running   0          0s
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+kubernetes                ClusterIP   10.96.0.1      <none>        443/TCP   23m
+troubleshooting-service   ClusterIP   10.104.34.17   <none>        80/TCP    0s
+=== 2. check the application ===
+NAME                                   READY   STATUS    RESTARTS   AGE   IP            NODE       NOMINATED NODE   READINESS GATES
+troubleshooting-app-59d4957864-g8d57   1/1     Running   0          1s    10.244.0.11   minikube   <none>           <none>
+troubleshooting-app-59d4957864-r687d   1/1     Running   0          1s    10.244.0.12   minikube   <none>           <none>
+Name:             troubleshooting-app-59d4957864-g8d57
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             minikube/192.168.49.2
+Start Time:       Wed, 07 Oct 2026 06:07:32 +0000
+Labels:           app=troubleshooting-app
+                  pod-template-hash=59d4957864
+Annotations:      <none>
+Status:           Running
+IP:               10.244.0.11
+IPs:
+  IP:           10.244.0.11
+Controlled By:  ReplicaSet/troubleshooting-app-59d4957864
+Containers:
+  app:
+    Container ID:   containerd://528eba1479a9530bf90459c49a7f34cf8859921357aafb90bd593f120afac985
+    Image:          nginx:1.27
+    Image ID:       sha256:1e5f3c5b981a9f91ca91cf13ce87c2eedfc7a083f4f279552084dd08fc477512
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Wed, 07 Oct 2026 06:07:32 +0000
+    Ready:          True
+    Restart Count:  0
+/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf
+10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+=== 3-4. service + endpoints ===
+Name:                     troubleshooting-service
+Namespace:                default
+Labels:                   <none>
+Annotations:              <none>
+Selector:                 app=troubleshooting-app
+Type:                     ClusterIP
+IP Family Policy:         SingleStack
+IP Families:              IPv4
+IP:                       10.104.34.17
+IPs:                      10.104.34.17
+Port:                     <unset>  80/TCP
+TargetPort:               80/TCP
+Endpoints:                10.244.0.11:80,10.244.0.12:80
+Session Affinity:         None
+Internal Traffic Policy:  Cluster
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                      ENDPOINTS                       AGE
+troubleshooting-service   10.244.0.11:80,10.244.0.12:80   1s
+=== 5-6. broken pod ===
+pod/project-broken-pod created
+NAME                 READY   STATUS              RESTARTS   AGE
+project-broken-pod   0/1     ContainerCreating   0          15s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  15s   default-scheduler  Successfully assigned default/project-broken-pod to minikube
+  Normal  Pulling    14s   kubelet            spec.containers{app}: Pulling image "nginx:this-tag-does-not-exist"
+Q1 status: ContainerCreating
+Q2 error: Failed to pull image nginx:this-tag-does-not-exist (tag does not exist on Docker Hub)
+Q3 command: kubectl describe pod project-broken-pod (Events section)
+Q4 wrong with image: the tag this-tag-does-not-exist does not exist for nginx
+Q5 fix: point the pod at an existing tag, e.g. nginx:1.27
+=== 7. fix broken pod ===
+pod/project-broken-pod patched
+NAME                 READY   STATUS              RESTARTS   AGE
+project-broken-pod   0/1     ContainerCreating   0          21s
+=== 8-9. service selector break ===
+service/troubleshooting-service patched
+NAME                      TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+troubleshooting-service   ClusterIP   10.104.34.17   <none>        80/TCP    25s
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                      ENDPOINTS   AGE
+troubleshooting-service   <none>      25s
+NAME                                   READY   STATUS              RESTARTS   AGE   LABELS
+project-broken-pod                     0/1     ContainerCreating   0          24s   <none>
+troubleshooting-app-59d4957864-g8d57   1/1     Running             0          25s   app=troubleshooting-app,pod-template-hash=59d4957864
+troubleshooting-app-59d4957864-r687d   1/1     Running             0          25s   app=troubleshooting-app,pod-template-hash=59d4957864
+Selector:                 app=wrong-app
+ROOT CAUSE: service selector app=wrong-app matches no pod labels (pods have app=troubleshooting-app) => endpoints <none>
+=== fix selector ===
+service/troubleshooting-service patched
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                      ENDPOINTS                       AGE
+troubleshooting-service   10.244.0.11:80,10.244.0.12:80   28s
+=== 10. final checklist ===
+NAME                                   READY   STATUS              RESTARTS   AGE
+project-broken-pod                     0/1     ContainerCreating   0          27s
+troubleshooting-app-59d4957864-g8d57   1/1     Running             0          28s
+troubleshooting-app-59d4957864-r687d   1/1     Running             0          28s
+28s         Normal   SuccessfulCreate          replicaset/troubleshooting-app-59d4957864   Created pod: troubleshooting-app-59d4957864-g8d57
+28s         Normal   SuccessfulCreate          replicaset/troubleshooting-app-59d4957864   Created pod: troubleshooting-app-59d4957864-r687d
+28s         Normal   ScalingReplicaSet         deployment/troubleshooting-app              Scaled up replica set troubleshooting-app-59d4957864 from 0 to 2
+27s         Normal   Scheduled                 pod/project-broken-pod                      Successfully assigned default/project-broken-pod to minikube
+26s         Normal   Pulling                   pod/project-broken-pod                      Pulling image "nginx:this-tag-does-not-exist"
+Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
+NAME                      ENDPOINTS                       AGE
+troubleshooting-service   10.244.0.11:80,10.244.0.12:80   28s
+### S14 DONE - Wed Oct  7 06:08:00 UTC 2026

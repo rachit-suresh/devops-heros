@@ -1,0 +1,74 @@
+name: Session 21 TaskBoard CI/CD - 24BCS10139
+on:
+  push:
+    branches: [session-21-taskboard-demo-rachit-24bcs10139]
+    paths:
+      - 'session21-python/**'
+      - '.github/workflows/taskboard-ci.yml'
+  workflow_dispatch:
+
+env:
+  APP_DIR: session21-python
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.APP_DIR }}/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt pytest httpx
+      - run: pytest -v
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.APP_DIR }}/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install && npm run build
+
+  docker-build-scan-push:
+    needs: [pytest, frontend-build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build backend image
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/taskboard-backend:${{ github.sha }} -t ghcr.io/${{ github.repository_owner }}/taskboard-backend:latest ${{ env.APP_DIR }}/backend
+      - name: Build frontend image
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/taskboard-frontend:${{ github.sha }} -t ghcr.io/${{ github.repository_owner }}/taskboard-frontend:latest ${{ env.APP_DIR }}/frontend
+      - name: Trivy scan backend (HIGH,CRITICAL)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/taskboard-backend:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+      - name: Trivy scan frontend (HIGH,CRITICAL)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/taskboard-frontend:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+      - name: Push images to GHCR
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/taskboard-backend:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/taskboard-backend:latest
+          docker push ghcr.io/${{ github.repository_owner }}/taskboard-frontend:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/taskboard-frontend:latest

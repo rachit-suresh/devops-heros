@@ -1,0 +1,12 @@
+
+✓ session-17-devsecops-rachit-24bcs10139 Session 17 DevSecOps Pipeline - 24BCS10139 · 37580263897
+Triggered via push about 30 minutes ago
+
+JOBS
+✓ SAST - CodeQL in 44s (ID 112658060450)
+✓ SCA - pip-audit in 16s (ID 112658060600)
+✓ Unit Tests (pytest) in 9s (ID 112658060610)
+✓ Docker Build in 14s (ID 112658274654)
+✓ Image Scan - Trivy in 19s (ID 112658353059)
+✓ Push Image to GHCR in 23s (ID 112658450439)
+✓ Deploy to ephemeral kind cluster in 1m9s (ID 112658568276)

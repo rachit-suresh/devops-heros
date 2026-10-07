@@ -1,0 +1,19 @@
+Push Image to GHCR	Build, tag and push	2026-10-07T06:14:11.0355355Z #11 naming to ghcr.io/rachit-suresh/hey-cicd:latest done
+Push Image to GHCR	Build, tag and push	2026-10-07T06:14:11.0741934Z The push refers to repository [ghcr.io/rachit-suresh/hey-cicd]
+Push Image to GHCR	Build, tag and push	2026-10-07T06:14:16.8554389Z 183e5d15646c5cd9e86b0bd5a4697419ee7db41a: digest: sha256:fff74ec072c120513c165ce6163098cddc79bb4fbf91c8d5763d097f4280537e size: 1992
+Push Image to GHCR	Build, tag and push	2026-10-07T06:14:16.8757129Z The push refers to repository [ghcr.io/rachit-suresh/hey-cicd]
+Push Image to GHCR	Build, tag and push	2026-10-07T06:14:17.8579030Z latest: digest: sha256:fff74ec072c120513c165ce6163098cddc79bb4fbf91c8d5763d097f4280537e size: 1992
+Push Image to GHCR	Post Run docker/login-action@v3	2026-10-07T06:14:18.0356605Z ##[group]Logout from ghcr.io
+Push Image to GHCR	Post Run docker/login-action@v3	2026-10-07T06:14:18.0380891Z [command]/usr/bin/docker logout ghcr.io
+Push Image to GHCR	Post Run docker/login-action@v3	2026-10-07T06:14:18.0479396Z Removing login credentials for ghcr.io
+
+Deploy to ephemeral kind cluster	Deploy manifests with this commit's image	2026-10-07T06:15:24.7340368Z ^[[36;1msed -i "s|ghcr.io/rachit-suresh/hey-cicd:__IMAGE_TAG__|hey-cicd:183e5d15646c5cd9e86b0bd5a4697419ee7db41a|; s|imagePullPolicy: Always|imagePullPolicy: IfNotPresent|" session-17-devsecops/Rachit-24bcs10139/hey-cicd/k8s/deployment.yaml^[[0m
+Deploy to ephemeral kind cluster	Deploy manifests with this commit's image	2026-10-07T06:15:24.7341242Z ^[[36;1mkubectl apply -f session-17-devsecops/Rachit-24bcs10139/hey-cicd/k8s/deployment.yaml^[[0m
+Deploy to ephemeral kind cluster	Deploy manifests with this commit's image	2026-10-07T06:15:24.7341876Z ^[[36;1mkubectl apply -f session-17-devsecops/Rachit-24bcs10139/hey-cicd/k8s/service.yaml^[[0m
+Deploy to ephemeral kind cluster	Deploy manifests with this commit's image	2026-10-07T06:15:24.8095243Z deployment.apps/session17-python created
+Deploy to ephemeral kind cluster	Deploy manifests with this commit's image	2026-10-07T06:15:24.9014081Z service/session17-python created
+Deploy to ephemeral kind cluster	Verify rollout	﻿2026-10-07T06:15:24.9074496Z ##[group]Run kubectl rollout status deployment/session17-python --timeout=120s
+Deploy to ephemeral kind cluster	Verify rollout	2026-10-07T06:15:24.9075037Z ^[[36;1mkubectl rollout status deployment/session17-python --timeout=120s^[[0m
+Deploy to ephemeral kind cluster	Verify rollout	2026-10-07T06:15:24.9639644Z Waiting for deployment "session17-python" rollout to finish: 0 of 2 updated replicas are available...
+Deploy to ephemeral kind cluster	Verify rollout	2026-10-07T06:15:26.3277777Z Waiting for deployment "session17-python" rollout to finish: 1 of 2 updated replicas are available...
+Deploy to ephemeral kind cluster	Verify rollout	2026-10-07T06:15:26.3322232Z deployment "session17-python" successfully rolled out

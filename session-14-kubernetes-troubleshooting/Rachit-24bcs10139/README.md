@@ -17,10 +17,22 @@ Troubleshooting challenge run on minikube (Kubernetes v1.37) inside a GitHub Cod
 - Service with broken selector: `kubectl get endpoints` returns `<none>` because no pods match; fixing the selector back to `app=troubleshooting-app` restores the endpoints.
 
 ## Screenshots
-- `Screenshots/01-deploy-verify.png` - deployment, pods, service verification
-- `Screenshots/02-broken-pod-diagnosis.png` - broken pod events + Q&A + fix
-- `Screenshots/03-selector-endpoints.png` - selector break, `<none>` endpoints, fix
-- `Screenshots/04-final-checklist.png` - final healthy state
+### deployment, pods, service verification
+
+![deployment, pods, service verification](Screenshots/01-deploy-verify.png)
+
+### broken pod events + Q&A + fix
+
+![broken pod events + Q&A + fix](Screenshots/02-broken-pod-diagnosis.png)
+
+### selector break, `empty` endpoints, fix
+
+![selector break, `empty` endpoints, fix](Screenshots/03-selector-endpoints.png)
+
+### final healthy state
+
+![final healthy state](Screenshots/04-final-checklist.png)
+
 
 ## Evidence
 - `evidence/session-14.log` - full terminal capture of the whole run

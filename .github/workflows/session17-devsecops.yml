@@ -1,0 +1,103 @@
+name: Session 17 DevSecOps Pipeline - 24BCS10139
+on:
+  push:
+    branches: [session-17-devsecops-rachit-24bcs10139]
+  workflow_dispatch:
+permissions:
+  contents: read
+  security-events: write
+  packages: write
+jobs:
+  test:
+    name: Unit Tests (pytest)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: session-17-devsecops/Rachit-24bcs10139/hey-cicd
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: pytest --cov=app --cov-report=term-missing
+  sast:
+    name: SAST - CodeQL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: python
+      - uses: github/codeql-action/analyze@v3
+  sca:
+    name: SCA - pip-audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: session-17-devsecops/Rachit-24bcs10139/hey-cicd
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          pip install -r requirements.txt
+          pip install pip-audit
+      - run: pip-audit
+  docker-build:
+    name: Docker Build
+    needs: [test, sast, sca]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t hey-cicd:${{ github.sha }} session-17-devsecops/Rachit-24bcs10139/hey-cicd
+  image-scan:
+    name: Image Scan - Trivy
+    needs: docker-build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t hey-cicd:${{ github.sha }} session-17-devsecops/Rachit-24bcs10139/hey-cicd
+      - name: Trivy scan (HIGH,CRITICAL)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: hey-cicd:${{ github.sha }}
+          severity: HIGH,CRITICAL
+  push-ghcr:
+    name: Push Image to GHCR
+    needs: image-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build, tag and push
+        run: |
+          cd session-17-devsecops/Rachit-24bcs10139/hey-cicd
+          docker build -t ghcr.io/rachit-suresh/hey-cicd:${{ github.sha }} -t ghcr.io/rachit-suresh/hey-cicd:latest .
+          docker push ghcr.io/rachit-suresh/hey-cicd:${{ github.sha }}
+          docker push ghcr.io/rachit-suresh/hey-cicd:latest
+  deploy:
+    name: Deploy to ephemeral kind cluster
+    needs: push-ghcr
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: helm/kind-action@v1.10.0
+      - name: Build image and load into kind
+        run: |
+          docker build -t hey-cicd:${{ github.sha }} session-17-devsecops/Rachit-24bcs10139/hey-cicd
+          kind load docker-image hey-cicd:${{ github.sha }}
+      - name: Deploy manifests with this commit's image
+        run: |
+          sed -i "s|ghcr.io/rachit-suresh/hey-cicd:__IMAGE_TAG__|hey-cicd:${{ github.sha }}|; s|imagePullPolicy: Always|imagePullPolicy: IfNotPresent|" session-17-devsecops/Rachit-24bcs10139/hey-cicd/k8s/deployment.yaml
+          kubectl apply -f session-17-devsecops/Rachit-24bcs10139/hey-cicd/k8s/deployment.yaml
+          kubectl apply -f session-17-devsecops/Rachit-24bcs10139/hey-cicd/k8s/service.yaml
+      - name: Verify rollout
+        run: kubectl rollout status deployment/session17-python --timeout=120s

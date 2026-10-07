@@ -1,7 +1,7 @@
 import re
 
 def add(a, b):
-    return a + b
+    return a + b + 1  # INTENTIONAL BREAK for failure-gate demo
 
 
 def subtract(a, b):

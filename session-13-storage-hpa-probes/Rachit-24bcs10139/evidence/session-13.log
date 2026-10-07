@@ -1,0 +1,430 @@
+### SESSION 13 RUN - Wed Oct  7 05:51:11 UTC 2026 - codespace codespaces-d454e6
+### hostname: codespaces-d454e6; kubectl: Client Version: v1.37.0
+Kustomize Version: v5.8.1
+* metrics-server is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+  - Using image registry.k8s.io/metrics-server/metrics-server:v0.9.0
+* The 'metrics-server' addon is enabled
+=== STEP 5.1 namespace ===
+namespace/production-webapp created
+=== STEP 5.2 pvc ===
+persistentvolumeclaim/web-data created
+NAME       STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+web-data   Bound    pvc-9b245f84-b6e5-4845-88c4-036f3d8b9b01   500Mi      RWO            standard       <unset>                 0s
+=== STEP 5.3 deployment + service ===
+deployment.apps/web-app created
+service/web-service created
+Waiting for deployment "web-app" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "web-app" rollout to finish: 1 of 2 updated replicas are available...
+deployment "web-app" successfully rolled out
+NAME                      READY   STATUS    RESTARTS   AGE   IP           NODE       NOMINATED NODE   READINESS GATES
+web-app-d45775485-49xn6   1/1     Running   0          9s    10.244.0.5   minikube   <none>           <none>
+web-app-d45775485-x4qnb   1/1     Running   0          9s    10.244.0.4   minikube   <none>           <none>
+=== STEP 5.4 hpa ===
+horizontalpodautoscaler.autoscaling/web-app-hpa created
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          1s
+=== TASK 1 storage persistence ===
+pod: web-app-d45775485-49xn6
+Student: Rachit 24BCS10139
+pod "web-app-d45775485-49xn6" deleted from production-webapp namespace
+Waiting for deployment "web-app" rollout to finish: 1 of 2 updated replicas are available...
+deployment "web-app" successfully rolled out
+new pod: web-app-d45775485-k79xz
+Student: Rachit 24BCS10139
+=== TASK 2 service verification ===
+NAME          TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+web-service   ClusterIP   10.108.106.54   <none>        80/TCP    19s
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+=== TASK 3 HPA scaling ===
+pod/load-generator created
+--- t+20s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          34s
+3
+--- t+40s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          54s
+3
+--- t+60s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          74s
+3
+--- t+80s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          94s
+3
+--- t+100s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          114s
+3
+--- t+120s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          2m14s
+3
+--- t+140s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          2m35s
+3
+--- t+160s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          2m55s
+3
+--- t+180s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          3m15s
+3
+--- t+200s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          3m35s
+3
+--- t+220s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          3m55s
+3
+--- t+240s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          4m16s
+3
+pod "load-generator" deleted from production-webapp namespace
+--- load removed; scale-down stabilization window is ~5min per HPA defaults ---
+--- drain t+60s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 22%/50%   2         5         2          5m47s
+--- drain t+120s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          6m48s
+--- drain t+180s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          7m49s
+NAME                      READY   STATUS    RESTARTS   AGE
+web-app-d45775485-k79xz   1/1     Running   0          7m49s
+web-app-d45775485-x4qnb   1/1     Running   0          7m59s
+=== probe config proof ===
+{"failureThreshold":30,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"periodSeconds":2,"successThreshold":1,"timeoutSeconds":1}
+{"failureThreshold":2,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":5,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":2}
+{"failureThreshold":3,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":5,"periodSeconds":5,"successThreshold":1,"timeoutSeconds":2}
+### S13 DONE - Wed Oct  7 05:59:11 UTC 2026
+
+### TASK 3 RE-RUN after metrics-server fix - Wed Oct  7 05:59:49 UTC 2026
+(first HPA window ran while metrics-server image was still being pulled; apiservice now healthy)
+NAME                      CPU(cores)   MEMORY(bytes)   
+web-app-d45775485-k79xz   1m           4Mi             
+web-app-d45775485-x4qnb   1m           4Mi             
+pod/load-generator-2 created
+--- t+20s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          8m48s
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+40s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          9m8s
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+60s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 27%/50%   2         5         2          9m29s
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+80s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 27%/50%   2         5         2          9m49s
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+100s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 27%/50%   2         5         2          10m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+120s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 38%/50%   2         5         2          10m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+140s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 38%/50%   2         5         2          10m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+160s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 38%/50%   2         5         2          11m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+180s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 35%/50%   2         5         2          11m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+200s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 35%/50%   2         5         2          11m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+220s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 35%/50%   2         5         2          12m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+240s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 37%/50%   2         5         2          12m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+260s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 37%/50%   2         5         2          12m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+280s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 37%/50%   2         5         2          13m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+--- t+300s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 37%/50%   2         5         2          13m
+load-generator-2 Running
+web-app-d45775485-k79xz Running
+web-app-d45775485-x4qnb Running
+pod "load-generator-2" deleted from production-webapp namespace
+--- load removed; watching scale-down ---
+--- drain t+60s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 27%/50%   2         5         2          15m
+--- drain t+120s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          16m
+--- drain t+180s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          17m
+--- drain t+240s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          18m
+--- drain t+300s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          19m
+--- drain t+360s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          20m
+NAME                      READY   STATUS    RESTARTS   AGE
+web-app-d45775485-k79xz   1/1     Running   0          20m
+web-app-d45775485-x4qnb   1/1     Running   0          20m
+### S13 HPA RE-RUN DONE - Wed Oct  7 06:11:23 UTC 2026
+
+### TASK 3 SCALE-OUT SPIKE (3 load generators) - Wed Oct  7 06:12:09 UTC 2026
+pod/load-gen-a created
+pod/load-gen-b created
+pod/load-gen-c created
+--- spike t+20s ---
+NAME          REFERENCE            TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 1%/50%   2         5         2          21m
+--- spike t+40s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 27%/50%   2         5         2          21m
+--- spike t+60s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 27%/50%   2         5         2          21m
+--- spike t+80s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 27%/50%   2         5         2          22m
+--- spike t+100s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 66%/50%   2         5         2          22m
+=== HPA scale-out with fortio load (30 connections, max rate) - Wed Oct  7 06:35:19 UTC 2026 ===
+pod/fortio created
+--- fortio t+15s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+30s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+45s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+60s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+75s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+90s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+105s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+120s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+135s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+150s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+165s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+180s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+195s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+--- fortio t+210s ---
+Error from server (NotFound): horizontalpodautoscalers.autoscaling "web-app-hpa" not found
+No resources found in default namespace.
+=== S13 REDO after minikube restart: reload images + metrics-server - Wed Oct  7 06:42:52 UTC 2026 ===
+* metrics-server is an addon maintained by Kubernetes. For any concerns contact minikube on GitHub.
+You can view the list of minikube maintainers at: https://github.com/kubernetes/minikube/blob/master/OWNERS
+  - Using image registry.k8s.io/metrics-server/metrics-server:v0.9.0
+* The 'metrics-server' addon is enabled
+1.27: Pulling from library/nginx
+Digest: sha256:6784fb0834aa7dbbe12e3d7471e69c290df3e6ba810dc38b34ae33d3c1c05f7d
+Status: Image is up to date for nginx:1.27
+docker.io/library/nginx:1.27
+1.70.0: Pulling from fortio/fortio
+Digest: sha256:fdacafebdd3c690a21941cb0fa477762669fb1b3000d26be11bd4b2c3c878c21
+Status: Image is up to date for fortio/fortio:1.70.0
+docker.io/fortio/fortio:1.70.0
+v0.9.0: Pulling from metrics-server/metrics-server
+Digest: sha256:d9862115e7c7881280d3d75ca26bda8ffc0fc213315979575bf23ce9826205c0
+Status: Image is up to date for registry.k8s.io/metrics-server/metrics-server:v0.9.0
+registry.k8s.io/metrics-server/metrics-server:v0.9.0
+Error from server (NotFound): deployments.apps "metrics-server" not found
+=== waiting for web-app rollout ===
+error: timed out waiting for the condition on deployments/web-app
+NAME                       READY   STATUS             RESTARTS   AGE
+web-app-5b6bd49dd5-jq8lk   0/1     ImagePullBackOff   0          2m9s
+web-app-5b6bd49dd5-vwmqv   0/1     ImagePullBackOff   0          2m9s
+=== waiting for metrics ===
+metrics not ready yet
+metrics not ready yet
+metrics not ready yet
+=== HPA scale-out state after sustained load (3 busybox generators) - Wed Oct  7 06:52:53 UTC 2026 ===
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 46%/50%   2         5         4          61m
+NAME                      CPU(cores)   MEMORY(bytes)   
+load-gen-a                594m         1Mi             
+load-gen-b                580m         1Mi             
+load-gen-c                580m         1Mi             
+web-app-d45775485-k79xz   46m          4Mi             
+web-app-d45775485-q8g5b   46m          4Mi             
+web-app-d45775485-twpj9   45m          4Mi             
+web-app-d45775485-x4qnb   47m          4Mi             
+NAME                      READY   STATUS    RESTARTS   AGE
+load-gen-a                1/1     Running   0          40m
+load-gen-b                1/1     Running   0          40m
+load-gen-c                1/1     Running   0          40m
+web-app-d45775485-k79xz   1/1     Running   0          61m
+web-app-d45775485-q8g5b   1/1     Running   0          37m
+web-app-d45775485-twpj9   1/1     Running   0          39m
+web-app-d45775485-x4qnb   1/1     Running   0          61m
+=== fortio burst to push toward maxReplicas - Wed Oct  7 06:52:54 UTC 2026 ===
+pod/fortio created
+--- fortio t+15s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          10m
+--- fortio t+30s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          11m
+--- fortio t+45s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          11m
+--- fortio t+60s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          11m
+--- fortio t+75s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          11m
+--- fortio t+90s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          12m
+--- fortio t+105s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          12m
+--- fortio t+120s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          12m
+--- fortio t+135s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          12m
+--- fortio t+150s ---
+NAME          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: <unknown>/50%   2         5         2          13m
+--- fortio t+165s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 31%/50%   2         5         4          64m
+--- fortio t+180s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 31%/50%   2         5         4          64m
+--- fortio t+195s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 31%/50%   2         5         4          64m
+--- fortio t+210s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 35%/50%   2         5         4          65m
+--- fortio t+225s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 35%/50%   2         5         4          65m
+--- fortio t+240s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 35%/50%   2         5         4          65m
+--- fortio t+255s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 35%/50%   2         5         4          66m
+--- fortio t+270s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 24%/50%   2         5         4          66m
+--- fortio t+285s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 24%/50%   2         5         4          66m
+--- fortio t+300s ---
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 24%/50%   2         5         4          66m
+# target 99% 0.00312697
+# target 99.9% 0.00317594
+Sockets used: 30 (for perfect keepalive, would be 30)
+Uniform: false, Jitter: false, Catchup allowed: true
+IP addresses distribution:
+10.108.106.54:80: 30
+Code 200 : 2400 (100.0 %)
+Response Header Sizes : count 2400 avg 238 +/- 0 min 238 max 238 sum 571200
+Response Body/Total Sizes : count 2400 avg 853 +/- 0 min 853 max 853 sum 2047200
+All done 2400 calls (plus 30 warmup) 1.857 ms avg, 8.0 qps
+pod "fortio" deleted from production-webapp namespace
+=== final ===
+NAME          REFERENCE            TARGETS        MINPODS   MAXPODS   REPLICAS   AGE
+web-app-hpa   Deployment/web-app   cpu: 24%/50%   2         5         4          66m
+NAME                      READY   STATUS    RESTARTS   AGE
+load-gen-a                1/1     Running   0          45m
+load-gen-b                1/1     Running   0          45m
+load-gen-c                1/1     Running   0          45m
+web-app-d45775485-k79xz   1/1     Running   0          66m
+web-app-d45775485-q8g5b   1/1     Running   0          42m
+web-app-d45775485-twpj9   1/1     Running   0          44m
+web-app-d45775485-x4qnb   1/1     Running   0          66m
+### S13 CAPTURE DONE - Wed Oct  7 06:58:08 UTC 2026

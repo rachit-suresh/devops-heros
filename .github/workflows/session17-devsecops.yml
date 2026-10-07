@@ -90,6 +90,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: helm/kind-action@v1.10.0
+        with:
+          cluster_name: kind
       - name: Build image and load into kind
         run: |
           docker build -t hey-cicd:${{ github.sha }} session-17-devsecops/Rachit-24bcs10139/hey-cicd

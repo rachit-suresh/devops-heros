@@ -16,11 +16,26 @@ Built a Helm chart (`notes-chart`) from scratch and ran the full release lifecyc
 8. `helm uninstall notes-dev` - release and resources removed.
 
 ## Screenshots
-- `Screenshots/01-chart-lint.png` - chart layout + lint
-- `Screenshots/02-template.png` - helm template output
-- `Screenshots/03-install-upgrade.png` - install (dev) then upgrade to prod values
-- `Screenshots/04-rollback.png` - bad upgrade + rollback to revision 2
-- `Screenshots/05-cleanup.png` - uninstall
+### chart layout + lint
+
+![chart layout + lint](Screenshots/01-chart-lint.png)
+
+### helm template output
+
+![helm template output](Screenshots/02-template.png)
+
+### install (dev) then upgrade to prod values
+
+![install (dev) then upgrade to prod values](Screenshots/03-install-upgrade.png)
+
+### bad upgrade + rollback to revision 2
+
+![bad upgrade + rollback to revision 2](Screenshots/04-rollback.png)
+
+### uninstall
+
+![uninstall](Screenshots/05-cleanup.png)
+
 
 ## Evidence
 - `evidence/session-15.log` - full terminal capture

@@ -54,3 +54,54 @@ session21-python/Rachit-24bcs10139/
   Screenshots/                     <- terminal PNGs, one per demo item group
   evidence/session-21-taskboard-clean.log  <- full captured run log
 ```
+
+## Screenshots
+
+### Application and API CRUD
+
+![Application and API CRUD](Screenshots/01-app-crud.png)
+
+### PostgreSQL tasks table
+
+![PostgreSQL tasks table](Screenshots/02-database.png)
+
+### Local Docker images
+
+![Local Docker images](Screenshots/03-docker-images.png)
+
+### Terraform validation and plan
+
+![Terraform validation and plan](Screenshots/04-terraform.png)
+
+### Kubernetes pods and Helm release
+
+![Kubernetes pods and Helm release](Screenshots/05-k8s-helm.png)
+
+### Ingress routing and CRUD
+
+![Ingress routing and CRUD](Screenshots/06-ingress.png)
+
+### HPA scaling under load
+
+![HPA scaling under load](Screenshots/07-hpa-scale.png)
+
+### Failure diagnosis and fixes
+
+![Failure diagnosis and fixes](Screenshots/08-troubleshooting.png)
+
+### Prometheus and Grafana
+
+![Prometheus and Grafana](Screenshots/09-monitoring.png)
+
+### Application metrics scrape
+
+![Application metrics scrape](Screenshots/10-app-scrape.png)
+
+### Git change and CI
+
+![Git change and CI](Screenshots/11-git-ci.png)
+
+### CI, Trivy scans and GHCR push
+
+![CI, Trivy scans and GHCR push](Screenshots/12-ci-trivy-ghcr.png)
+

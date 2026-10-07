@@ -16,3 +16,11 @@ The deployment is an ephemeral classroom demo, not a public or production deploy
 Workflow: `.github/workflows/session16-cicd.yml`.
 
 Environment: prepared remotely with assistant help; execution evidence must come from the real Codespaces terminal and GitHub Actions run, not example output.
+
+## Verification update (Oct 7)
+
+Re-verified against the official Session 16 spec (final-cicd-pipeline README in `session-16-github-actions/`):
+
+- **Build artifact:** the Build job now also uploads the packaged build with `actions/upload-artifact` (artifact name `calculator-build`), so the pipeline demonstrates a stored artifact in addition to job-to-job handoff. Confirmed present on the green run (902 bytes).
+- **Failure gate demonstrated:** a deliberately broken push failed at the Test stage, and the Build + Deploy jobs were correctly skipped: https://github.com/rachit-suresh/devops-heros/actions/runs/37577639562
+- **Green run after fix:** the follow-up push restored all four stages to green: https://github.com/rachit-suresh/devops-heros/actions/runs/37577740951

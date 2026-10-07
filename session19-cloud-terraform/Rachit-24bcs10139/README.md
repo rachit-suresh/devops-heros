@@ -13,9 +13,18 @@ Built the official `08-mini-project` VPC stack (VPC, public subnet, internet gat
 - Verified through the LocalStack EC2 API: describe-vpcs / describe-subnets / describe-route-tables / describe-security-groups return the created resources.
 
 ## Screenshots
-- `Screenshots/01-init-validate.png` - init + validate
-- `Screenshots/02-apply.png` - apply complete (6 added)
-- `Screenshots/03-verify.png` - outputs, state list, EC2 API verification
+### init + validate
+
+![init + validate](Screenshots/01-init-validate.png)
+
+### apply complete (6 added)
+
+![apply complete (6 added)](Screenshots/02-apply.png)
+
+### outputs, state list, EC2 API verification
+
+![outputs, state list, EC2 API verification](Screenshots/03-verify.png)
+
 
 ## Evidence
 - `evidence/session-19.log` - full terminal capture

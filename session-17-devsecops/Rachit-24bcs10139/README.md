@@ -19,8 +19,14 @@ Workflow: `.github/workflows/session17-devsecops.yml` (on branch `session-17-dev
 - kind cluster name aligned (`cluster_name: kind`) so `kind load` and the deploy target the same cluster.
 
 ## Screenshots
-- `Screenshots/01-pipeline-jobs.png` - all 7 jobs green on run 37580263897
-- `Screenshots/02-ghcr-push-deploy.png` - GHCR push digest + kind deploy/rollout log lines
+### all 7 jobs green on run 37580263897
+
+![all 7 jobs green on run 37580263897](Screenshots/01-pipeline-jobs.png)
+
+### GHCR push digest + kind deploy/rollout log lines
+
+![GHCR push digest + kind deploy/rollout log lines](Screenshots/02-ghcr-push-deploy.png)
+
 
 ## Evidence
 - `evidence/s17-runview.txt` - gh run view output

@@ -4,7 +4,7 @@ metadata:
   name: session20-mini
   namespace: session20
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: session20-mini

@@ -1,10 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import PlainTextResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 import time
 
-from .database import get_db, Base, engine
+from .database import get_db, engine
 from .models import Album
 from .schemas import AlbumCreate, AlbumUpdate, AlbumOut
 
@@ -17,7 +19,8 @@ app = FastAPI(title="TrackTonic", version="1.0.0", description="Music listening 
 async def metrics_middleware(request, call_next):
     start = time.time()
     response = await call_next(request)
-    endpoint = request.url.path
+    route = request.scope.get("route")
+    endpoint = getattr(route, "path", "unmatched")
     REQUEST_LATENCY.labels(endpoint=endpoint).observe(time.time() - start)
     REQUEST_COUNT.labels(method=request.method, endpoint=endpoint, status=response.status_code).inc()
     return response
@@ -74,6 +77,12 @@ def delete_album(album_id: int, db: Session = Depends(get_db)):
     db.delete(album)
     db.commit()
 
-@app.on_event("startup")
-def startup():
-    Base.metadata.create_all(bind=engine)
+
+@app.get("/ready")
+def ready():
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1 FROM albums LIMIT 1"))
+        return {"status": "ready"}
+    except SQLAlchemyError:
+        raise HTTPException(503, "database or migrations not ready")

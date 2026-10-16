@@ -1,4 +1,4 @@
-# TrackTonic — Session 21 DevOps Capstone
+# TrackTonic - Session 21 DevOps Capstone
 
 Rachit · 24BCS10139
 
@@ -7,10 +7,10 @@ one you are currently spinning, and log what you have heard with a 1–5 rating.
 
 ## Stack
 
-- **Backend** — FastAPI + SQLAlchemy + Alembic, Prometheus metrics on `/metrics`
-- **Frontend** — vanilla JS single page served by nginx (responsive desktop + mobile)
-- **Database** — PostgreSQL 16
-- **Delivery** — Docker, Docker Compose, Helm on kind, GitHub Actions CI/CD publishing to GHCR
+- **Backend** - FastAPI + SQLAlchemy + Alembic, Prometheus metrics on `/metrics`
+- **Frontend** - vanilla JS single page served by nginx (responsive desktop + mobile)
+- **Database** - PostgreSQL 16
+- **Delivery** - Docker, Docker Compose, Helm on kind, GitHub Actions CI/CD publishing to GHCR
 
 ## Repository layout
 
@@ -51,12 +51,12 @@ cd backend && python -m pytest -q
 
 ## CI/CD (`.github/workflows/session21-capstone.yml`)
 
-- **pytest** — the 18-test suite on every push
-- **frontend-build** — static build check
-- **terraform-local-proof** — `terraform fmt -check`, `init`, `validate` for
+- **pytest** - the 18-test suite on every push
+- **frontend-build** - static build check
+- **terraform-local-proof** - `terraform fmt -check`, `init`, `validate` for
   `terraform/`, then `scripts/infra-proof.sh` applies `terraform-localstack/`
   against LocalStack and destroys it again
-- **build-scan-publish-demo** — builds both images tagged with the commit SHA,
+- **build-scan-publish-demo** - builds both images tagged with the commit SHA,
   runs strict Trivy gates (HIGH + CRITICAL, exit 1), pushes to GHCR, then
   deploys the exact scanned images on a throwaway kind cluster via the Helm
   chart and uploads the evidence as the `tracktonic-proof-<sha>` artifact:
@@ -77,8 +77,8 @@ cd backend && python -m pytest -q
 
 ## Infrastructure as code
 
-- `terraform/` — AWS VPC + EKS design; validated locally (`fmt`, `init`, `validate`).
-- `terraform-localstack/` — applied locally against LocalStack (`scripts/infra-proof.sh`).
+- `terraform/` - AWS VPC + EKS design; validated locally (`fmt`, `init`, `validate`).
+- `terraform-localstack/` - applied locally against LocalStack (`scripts/infra-proof.sh`).
 
 ## Kubernetes / Helm
 
@@ -104,7 +104,14 @@ live in `monitoring/`.
 
 ## Evidence
 
-- CI: see the Actions tab — latest green run on branch
-  `session-21-capstone-rachit-24bcs10139` (artifact `tracktonic-proof-<sha>`)
-- Images: `ghcr.io/rachit-suresh/tracktonic-backend:<commit-sha>` and
-  `ghcr.io/rachit-suresh/tracktonic-frontend:<commit-sha>`
+- Green CI run (all 4 jobs): https://github.com/rachit-suresh/devops-heros/actions/runs/38833116664
+  - artifact `tracktonic-proof-2b0e0ceb6938b184e167d9d0afab211a3bcd1930`:
+    Compose + kind runtime logs, `kubectl get pods` (all Running), Helm list,
+    browser screenshots (desktop, 390px and 320px mobile, Prometheus targets,
+    Grafana dashboard), Prometheus targets/metric JSON, and a
+    break-and-repair Service/EndpointSlice capture.
+  - artifact `tracktonic-local-infra-2b0e0ceb6938b184e167d9d0afab211a3bcd1930`:
+    terraform validate + LocalStack apply/destroy log and outputs.
+- Images: `ghcr.io/rachit-suresh/tracktonic-backend:2b0e0ceb6938b184e167d9d0afab211a3bcd1930`
+  and `ghcr.io/rachit-suresh/tracktonic-frontend:2b0e0ceb6938b184e167d9d0afab211a3bcd1930`
+  (SHA-tagged, Trivy-scanned before publish; later commits publish their own SHA tags).

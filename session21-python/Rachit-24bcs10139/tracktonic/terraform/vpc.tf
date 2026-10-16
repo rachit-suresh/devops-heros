@@ -1,7 +1,7 @@
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
-  tags = { Name = "${var.project_name}-vpc" }
+  tags                 = { Name = "${var.project_name}-vpc" }
 }
 
 resource "aws_subnet" "public_a" {
@@ -9,7 +9,7 @@ resource "aws_subnet" "public_a" {
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, 1)
   availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true
-  tags = { Name = "${var.project_name}-public-a" }
+  tags                    = { Name = "${var.project_name}-public-a" }
 }
 
 resource "aws_subnet" "public_b" {
@@ -17,12 +17,12 @@ resource "aws_subnet" "public_b" {
   cidr_block              = cidrsubnet(var.vpc_cidr, 8, 2)
   availability_zone       = "${var.aws_region}b"
   map_public_ip_on_launch = true
-  tags = { Name = "${var.project_name}-public-b" }
+  tags                    = { Name = "${var.project_name}-public-b" }
 }
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
-  tags = { Name = "${var.project_name}-igw" }
+  tags   = { Name = "${var.project_name}-igw" }
 }
 
 resource "aws_route_table" "public" {

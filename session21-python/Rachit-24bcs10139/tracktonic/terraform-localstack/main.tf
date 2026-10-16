@@ -23,7 +23,7 @@ provider "aws" {
 resource "aws_vpc" "demo" {
   cidr_block           = "10.30.0.0/16"
   enable_dns_hostnames = true
-  tags = { Name = "tracktonic-local-only" }
+  tags                 = { Name = "tracktonic-local-only" }
 }
 resource "aws_subnet" "public" {
   count                   = 2

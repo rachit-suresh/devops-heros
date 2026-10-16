@@ -21,8 +21,8 @@ python -m pip install --quiet playwright
 python -m playwright install --with-deps chromium
 APP_URL=http://localhost:3000 OUTPUT_PREFIX=compose python scripts/browser-proof.py
 # A throwaway local Kubernetes cluster, no AWS calls.
-curl -fsSL https://kind.sigs.k8s.io/dl/v0.31.0/kind-linux-amd64 -o /usr/local/bin/kind
-chmod +x /usr/local/bin/kind
+curl -fsSL https://kind.sigs.k8s.io/dl/v0.31.0/kind-linux-amd64 -o /tmp/kind
+sudo install -m 0755 /tmp/kind /usr/local/bin/kind
 cat > /tmp/kind.yaml <<YAML
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4

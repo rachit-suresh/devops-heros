@@ -1,0 +1,2 @@
+NAME      	NAMESPACE 	REVISION	UPDATED                                	STATUS  	CHART           	APP VERSION
+tracktonic	tracktonic	2       	2026-10-16 02:17:32.891323689 +0000 UTC	deployed	tracktonic-1.0.0	1.0.0      

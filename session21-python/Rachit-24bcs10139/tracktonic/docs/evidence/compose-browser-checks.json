@@ -1,0 +1,13 @@
+{
+  "crud_create": true,
+  "ratings": true,
+  "status_change": true,
+  "filters": true,
+  "search": true,
+  "no_overflow_widths": [
+    320,
+    390
+  ],
+  "xss_plain_text": true,
+  "page_errors": []
+}

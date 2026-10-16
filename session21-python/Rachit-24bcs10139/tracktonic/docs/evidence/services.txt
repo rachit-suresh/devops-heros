@@ -1,0 +1,6 @@
+NAME                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE
+backend             ClusterIP   10.96.40.156   <none>        8000/TCP   42s
+db                  ClusterIP   10.96.151.59   <none>        5432/TCP   42s
+frontend            ClusterIP   10.96.19.25    <none>        80/TCP     42s
+grafana             ClusterIP   10.96.36.15    <none>        3000/TCP   42s
+prometheus-server   ClusterIP   10.96.13.198   <none>        9090/TCP   42s

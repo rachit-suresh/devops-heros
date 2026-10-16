@@ -1,0 +1,9 @@
+NAME                          READY   STATUS      RESTARTS   AGE   IP            NODE                       NOMINATED NODE   READINESS GATES
+backend-68fffdc5fd-m6gzl      1/1     Running     0          42s   10.244.0.12   tracktonic-control-plane   <none>           <none>
+backend-68fffdc5fd-q7v74      1/1     Running     0          42s   10.244.0.9    tracktonic-control-plane   <none>           <none>
+frontend-774569f4f5-bphcp     1/1     Running     0          42s   10.244.0.13   tracktonic-control-plane   <none>           <none>
+frontend-774569f4f5-dsvz9     1/1     Running     0          42s   10.244.0.8    tracktonic-control-plane   <none>           <none>
+grafana-69dbc94db4-kn6rx      1/1     Running     0          42s   10.244.0.10   tracktonic-control-plane   <none>           <none>
+migrate-2-6zx4s               0/1     Completed   2          26s   10.244.0.17   tracktonic-control-plane   <none>           <none>
+postgres-6656d97d8-jvghp      1/1     Running     0          42s   10.244.0.16   tracktonic-control-plane   <none>           <none>
+prometheus-6f58cdccdb-bzqrt   1/1     Running     0          42s   10.244.0.11   tracktonic-control-plane   <none>           <none>

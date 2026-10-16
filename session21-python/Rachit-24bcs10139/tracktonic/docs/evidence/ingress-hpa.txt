@@ -1,0 +1,5 @@
+NAME                                   CLASS   HOSTS              ADDRESS   PORTS   AGE
+ingress.networking.k8s.io/tracktonic   nginx   tracktonic.local             80      26s
+
+NAME                                          REFERENCE            TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/backend   Deployment/backend   cpu: <unknown>/70%   2         6         2          42s

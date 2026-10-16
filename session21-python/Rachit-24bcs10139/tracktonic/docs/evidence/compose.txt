@@ -1,0 +1,4 @@
+NAME                    IMAGE                                                                                COMMAND                  SERVICE    CREATED          STATUS                    PORTS
+tracktonic-backend-1    ghcr.io/rachit-suresh/tracktonic-backend:71a2e84c373ab48b6bf2c3c2b99912a237addc1b    "sh -c 'alembic upgr…"   backend    12 seconds ago   Up 6 seconds (healthy)    0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+tracktonic-db-1         postgres:16-alpine                                                                   "docker-entrypoint.s…"   db         12 seconds ago   Up 12 seconds (healthy)   5432/tcp
+tracktonic-frontend-1   ghcr.io/rachit-suresh/tracktonic-frontend:71a2e84c373ab48b6bf2c3c2b99912a237addc1b   "/docker-entrypoint.…"   frontend   12 seconds ago   Up Less than a second     0.0.0.0:3000->8080/tcp, [::]:3000->8080/tcp

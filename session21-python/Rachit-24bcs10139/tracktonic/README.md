@@ -104,14 +104,45 @@ live in `monitoring/`.
 
 ## Evidence
 
-- Green CI run (all 4 jobs): https://github.com/rachit-suresh/devops-heros/actions/runs/38833116664
-  - artifact `tracktonic-proof-2b0e0ceb6938b184e167d9d0afab211a3bcd1930`:
+- Green CI run (all 4 jobs): https://github.com/rachit-suresh/devops-heros/actions/runs/38839345072
+  - artifact `tracktonic-proof-71a2e84c373ab48b6bf2c3c2b99912a237addc1b`:
     Compose + kind runtime logs, `kubectl get pods` (all Running), Helm list,
     browser screenshots (desktop, 390px and 320px mobile, Prometheus targets,
     Grafana dashboard), Prometheus targets/metric JSON, and a
     break-and-repair Service/EndpointSlice capture.
-  - artifact `tracktonic-local-infra-2b0e0ceb6938b184e167d9d0afab211a3bcd1930`:
+  - artifact `tracktonic-local-infra-71a2e84c373ab48b6bf2c3c2b99912a237addc1b`:
     terraform validate + LocalStack apply/destroy log and outputs.
-- Images: `ghcr.io/rachit-suresh/tracktonic-backend:2b0e0ceb6938b184e167d9d0afab211a3bcd1930`
-  and `ghcr.io/rachit-suresh/tracktonic-frontend:2b0e0ceb6938b184e167d9d0afab211a3bcd1930`
+- The same evidence is committed under [`docs/evidence/`](docs/evidence/)
+  (copied from those artifacts), so it renders without CI access:
+
+![TrackTonic UI on the kind cluster (desktop)](docs/evidence/kubernetes-desktop.png)
+
+![TrackTonic UI via Docker Compose (desktop)](docs/evidence/compose-desktop.png)
+
+![Prometheus targets](docs/evidence/prometheus-targets.png)
+
+![Grafana dashboard](docs/evidence/grafana-dashboard.png)
+
+  - Mobile viewports: [390px](docs/evidence/kubernetes-mobile-390.png),
+    [320px](docs/evidence/kubernetes-mobile-320.png) (Compose equivalents:
+    [390px](docs/evidence/compose-mobile-390.png),
+    [320px](docs/evidence/compose-mobile-320.png))
+  - Cluster state: [pods.txt](docs/evidence/pods.txt) (all Running),
+    [services.txt](docs/evidence/services.txt),
+    [helm.txt](docs/evidence/helm.txt),
+    [ingress-hpa.txt](docs/evidence/ingress-hpa.txt),
+    [postgres.txt](docs/evidence/postgres.txt)
+  - Full logs: [compose.txt](docs/evidence/compose.txt),
+    [runtime.log](docs/evidence/runtime.log)
+  - Monitoring data: [prometheus-targets.json](docs/evidence/prometheus-targets.json),
+    [metric-query.json](docs/evidence/metric-query.json),
+    browser checks ([Compose](docs/evidence/compose-browser-checks.json),
+    [kind](docs/evidence/kubernetes-browser-checks.json))
+  - Break-and-repair: [service-broken.yaml](docs/evidence/service-broken.yaml),
+    [service-repaired.yaml](docs/evidence/service-repaired.yaml)
+  - Terraform/LocalStack: [terraform.log](docs/evidence/terraform.log),
+    [localstack-outputs.json](docs/evidence/localstack-outputs.json),
+    [localstack-empty-state.txt](docs/evidence/localstack-empty-state.txt)
+- Images: `ghcr.io/rachit-suresh/tracktonic-backend:71a2e84c373ab48b6bf2c3c2b99912a237addc1b`
+  and `ghcr.io/rachit-suresh/tracktonic-frontend:71a2e84c373ab48b6bf2c3c2b99912a237addc1b`
   (SHA-tagged, Trivy-scanned before publish; later commits publish their own SHA tags).

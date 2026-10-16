@@ -1,0 +1,21 @@
+{
+  "local_subnets": {
+    "sensitive": false,
+    "type": [
+      "tuple",
+      [
+        "string",
+        "string"
+      ]
+    ],
+    "value": [
+      "subnet-acffca3b",
+      "subnet-27081605"
+    ]
+  },
+  "local_vpc_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "vpc-0304854b"
+  }
+}

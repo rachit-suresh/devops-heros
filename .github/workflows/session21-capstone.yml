@@ -6,71 +6,85 @@ on:
       - 'session21-python/Rachit-24bcs10139/tracktonic/**'
       - '.github/workflows/session21-capstone.yml'
   workflow_dispatch:
-
+permissions:
+  contents: read
+concurrency:
+  group: tracktonic-${{ github.ref }}
+  cancel-in-progress: true
 env:
   APP_DIR: session21-python/Rachit-24bcs10139/tracktonic
-
 jobs:
   pytest:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.APP_DIR }}/backend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install -r requirements.txt
-      - run: pytest
-
+        with: {python-version: '3.12'}
+      - run: pip install -r "$APP_DIR/backend/requirements.txt"
+      - run: cd "$APP_DIR/backend" && pytest -v
   frontend-build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ${{ env.APP_DIR }}/frontend
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: npm run build
-
-  docker-build-push:
+        with: {node-version: '22'}
+      - run: cd "$APP_DIR/frontend" && npm run build
+  build-scan-publish-demo:
     needs: [pytest, frontend-build]
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     permissions:
       contents: read
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build backend image
-        run: docker build -t ghcr.io/${{ github.repository_owner }}/tracktonic-backend:${{ github.sha }} -t ghcr.io/${{ github.repository_owner }}/tracktonic-backend:latest ${{ env.APP_DIR }}/backend
-      - name: Build frontend image
-        run: docker build -t ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:${{ github.sha }} -t ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:latest ${{ env.APP_DIR }}/frontend
-      - name: Trivy scan backend (fail on HIGH,CRITICAL)
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Build both images with commit-SHA tags
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/tracktonic-backend:${{ github.sha }} "$APP_DIR/backend"
+          docker build -t ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:${{ github.sha }} "$APP_DIR/frontend"
+      - name: Strict backend Trivy gate
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ghcr.io/${{ github.repository_owner }}/tracktonic-backend:${{ github.sha }}
           severity: HIGH,CRITICAL
           exit-code: '1'
-          ignore-unfixed: true
-      - name: Trivy scan frontend (fail on HIGH,CRITICAL)
+          ignore-unfixed: false
+      - name: Strict frontend Trivy gate
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:${{ github.sha }}
           severity: HIGH,CRITICAL
           exit-code: '1'
-          ignore-unfixed: true
-      - name: Push images
+          ignore-unfixed: false
+      - name: Authenticate GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish SHA-tagged images
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/tracktonic-backend:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/tracktonic-backend:latest
           docker push ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/tracktonic-frontend:latest
+      - uses: azure/setup-helm@v4.3.1
+      - name: Execute Compose and Kubernetes deployment proof
+        env:
+          BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/tracktonic-backend
+          FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/tracktonic-frontend
+          IMAGE_TAG: ${{ github.sha }}
+        run: bash "$APP_DIR/scripts/runtime-proof.sh"
+      - name: Upload actual execution logs and browser screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tracktonic-proof-${{ github.sha }}
+          path: ${{ env.APP_DIR }}/evidence/
+          if-no-files-found: warn
+      - name: Clean up demo resources
+        if: always()
+        run: |
+          cd "$APP_DIR"
+          docker compose down -v || true
+          kind delete cluster --name tracktonic || true

@@ -68,6 +68,14 @@ helm list -n tracktonic | tee evidence/helm.txt
 kubectl get ingress,hpa -n tracktonic | tee evidence/ingress-hpa.txt
 kubectl exec -n tracktonic deploy/postgres -- psql -U tracktonic -d tracktonic -c '\dt' | tee evidence/postgres.txt
 curl -fsS -H 'Host: tracktonic.local' http://localhost:8080/ > /dev/null
+# The frontend answers before ingress endpoints for the API sync; gate on the
+# API path too so the browser proof never loads a page whose fetch 503s.
+for i in $(seq 1 30); do
+  if curl -fsS -H 'Host: tracktonic.local' http://localhost:8080/api/albums > /dev/null; then
+    break
+  fi
+  sleep 2
+done
 kubectl port-forward -n tracktonic svc/grafana 3001:3000 > /tmp/grafana-forward.log 2>&1 &
 GRAFANA_PID=$!
 kubectl port-forward -n tracktonic svc/prometheus-server 9090:9090 > /tmp/prom-forward.log 2>&1 &

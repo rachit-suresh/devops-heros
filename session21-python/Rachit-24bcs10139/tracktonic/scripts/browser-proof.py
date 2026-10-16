@@ -7,7 +7,11 @@ from playwright.sync_api import sync_playwright
 out = Path('evidence')
 out.mkdir(exist_ok=True)
 with sync_playwright() as p:
-    browser = p.chromium.launch()
+    ingress_host = os.getenv('INGRESS_HOST')
+    # Chromium rejects an overridden Host header; map the ingress host to
+    # localhost at the DNS level instead.
+    launch_args = [f'--host-resolver-rules=MAP {ingress_host} 127.0.0.1'] if ingress_host else []
+    browser = p.chromium.launch(args=launch_args)
     if os.getenv('MONITORING_PROOF'):
         page = browser.new_page(viewport={'width': 1440, 'height': 1000})
         page.goto('http://localhost:9090/targets')
@@ -20,8 +24,11 @@ with sync_playwright() as p:
         raise SystemExit(0)
     url = os.environ['APP_URL']
     prefix = os.environ.get('OUTPUT_PREFIX', 'app')
-    headers = {'Host': os.environ['INGRESS_HOST']} if os.getenv('INGRESS_HOST') else {}
-    context = browser.new_context(extra_http_headers=headers, viewport={'width': 1440, 'height': 1000})
+    if ingress_host:
+        from urllib.parse import urlparse, urlunparse
+        parsed = urlparse(url)
+        url = urlunparse(parsed._replace(netloc=f'{ingress_host}:{parsed.port or 80}'))
+    context = browser.new_context(viewport={'width': 1440, 'height': 1000})
     page = context.new_page()
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))

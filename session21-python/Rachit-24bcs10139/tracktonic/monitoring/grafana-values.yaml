@@ -1,3 +1,4 @@
+# Standalone demo values - classroom-only credentials, not used for real deployment.
 # values for the grafana community chart (helm install grafana grafana/grafana -f grafana-values.yaml)
 adminPassword: tracktonic
 service:

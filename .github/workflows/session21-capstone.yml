@@ -88,3 +88,20 @@ jobs:
           cd "$APP_DIR"
           docker compose down -v || true
           kind delete cluster --name tracktonic || true
+
+  terraform-local-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.16.6'
+          terraform_wrapper: false
+      - run: bash "$APP_DIR/scripts/infra-proof.sh"
+      - name: Upload local infrastructure proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tracktonic-local-infra-${{ github.sha }}
+          path: ${{ env.APP_DIR }}/evidence/

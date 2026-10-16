@@ -4,6 +4,7 @@ metadata:
   name: tracktonic
   namespace: {{ .Values.namespace }}
 spec:
+  ingressClassName: {{ .Values.ingress.className }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:

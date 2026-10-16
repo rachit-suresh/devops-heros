@@ -1,12 +1,26 @@
 namespace: tracktonic
 backend:
   image: tracktonic-backend
-  tag: latest
+  tag: local
   replicas: 2
 frontend:
   image: tracktonic-frontend
-  tag: latest
+  tag: local
   replicas: 2
-databaseUrl: postgresql://tracktonic:tracktonic@db:5432/tracktonic
+postgres:
+  image: postgres:16-alpine
+  storage: 1Gi
+  # Classroom-only credentials. Use an externally managed Secret for real deployment.
+  password: tracktonic-demo-only
 ingress:
   host: tracktonic.local
+  className: nginx
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  cpuUtilization: 70
+monitoring:
+  enabled: true
+  prometheusImage: prom/prometheus:latest
+  grafanaImage: grafana/grafana:latest

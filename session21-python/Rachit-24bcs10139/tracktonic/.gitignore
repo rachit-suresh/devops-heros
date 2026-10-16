@@ -1,10 +1,12 @@
 .env
 __pycache__/
-node_modules/
-.venv/
-dist/
-test_tracktonic.db
 *.pyc
+node_modules/
+dist/
+.venv/
+*.db
+.pytest_cache/
 .terraform/
+*.tfstate*
+*.tfplan
 terraform.tfvars
-terraform.tfstate*

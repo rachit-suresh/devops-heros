@@ -46,8 +46,20 @@ for i in $(seq 1 60); do
   fi
   sleep 3
 done
+kubectl wait --namespace ingress-nginx --for=condition=complete job/ingress-nginx-admission-create job/ingress-nginx-admission-patch --timeout=180s
 helm lint helm/tracktonic
-helm upgrade --install tracktonic helm/tracktonic -n tracktonic --create-namespace --set backend.image="$BACKEND_IMAGE" --set backend.tag="$IMAGE_TAG" --set frontend.image="$FRONTEND_IMAGE" --set frontend.tag="$IMAGE_TAG" --wait --timeout 6m
+# The admission webhook can refuse connections for a few seconds after the
+# controller pod reports Ready; retry instead of racing it.
+helm_ok=0
+for attempt in 1 2 3 4 5; do
+  if helm upgrade --install tracktonic helm/tracktonic -n tracktonic --create-namespace --set backend.image="$BACKEND_IMAGE" --set backend.tag="$IMAGE_TAG" --set frontend.image="$FRONTEND_IMAGE" --set frontend.tag="$IMAGE_TAG" --wait --timeout 6m; then
+    helm_ok=1
+    break
+  fi
+  echo "helm install attempt $attempt failed; retrying in 15s"
+  sleep 15
+done
+[ "$helm_ok" = 1 ]
 kubectl get pods -n tracktonic -o wide | tee evidence/pods.txt
 kubectl get svc -n tracktonic | tee evidence/services.txt
 helm list -n tracktonic | tee evidence/helm.txt

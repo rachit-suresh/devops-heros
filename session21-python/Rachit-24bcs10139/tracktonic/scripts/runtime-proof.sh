@@ -38,6 +38,14 @@ kind load docker-image "${BACKEND_IMAGE}:${IMAGE_TAG}" "${FRONTEND_IMAGE}:${IMAG
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.15.1/deploy/static/provider/kind/deploy.yaml
 kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=240s
+# The controller pod reports ready before its admission webhook answers;
+# helm's Ingress apply fails against a half-up webhook. Wait for the endpoint.
+for i in $(seq 1 60); do
+  if kubectl get endpointslices -n ingress-nginx -l kubernetes.io/service-name=ingress-nginx-controller-admission -o jsonpath='{.items[*].endpoints[*].conditions.ready}' 2>/dev/null | grep -q true; then
+    break
+  fi
+  sleep 3
+done
 helm lint helm/tracktonic
 helm upgrade --install tracktonic helm/tracktonic -n tracktonic --create-namespace --set backend.image="$BACKEND_IMAGE" --set backend.tag="$IMAGE_TAG" --set frontend.image="$FRONTEND_IMAGE" --set frontend.tag="$IMAGE_TAG" --wait --timeout 6m
 kubectl get pods -n tracktonic -o wide | tee evidence/pods.txt

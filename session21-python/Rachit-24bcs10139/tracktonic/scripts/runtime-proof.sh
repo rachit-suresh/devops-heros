@@ -46,7 +46,9 @@ for i in $(seq 1 60); do
   fi
   sleep 3
 done
-kubectl wait --namespace ingress-nginx --for=condition=complete job/ingress-nginx-admission-create job/ingress-nginx-admission-patch --timeout=180s
+# Admission jobs can vanish before this wait (ttlSecondsAfterFinished), so
+# never fail here - the helm retry below is the real guard.
+kubectl wait --namespace ingress-nginx --for=condition=complete job/ingress-nginx-admission-create job/ingress-nginx-admission-patch --timeout=180s || true
 helm lint helm/tracktonic
 # The admission webhook can refuse connections for a few seconds after the
 # controller pod reports Ready; retry instead of racing it.
